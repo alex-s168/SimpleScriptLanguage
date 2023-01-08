@@ -337,6 +337,38 @@ def decodeblock(id):
                     o = s.replace(parsearg(com[1]), parsearg(com[2]))
                     storeb(com[4], o)
 
+                case "eq":                                             # Jumps to a block if both inputs are equal                                                                  eq [block] [in1] [in2]
+                    if parsearg(com[2]) == parsearg(com[3]):
+                        contdec = False
+                        decodeblock(com[1])
+
+                case "neq":                                            # Jumps to a block if both inputs are not equal                                                              eq [block] [in1] [in2]
+                    if not parsearg(com[2]) == parsearg(com[3]):
+                        contdec = False
+                        decodeblock(com[1])
+                
+                case "seq":                                             # Jumps to a subroutine if both inputs are equal                                                            eq [block] [in1] [in2] ?[out]
+                    if parsearg(com[2]) == parsearg(com[3]):
+                        t = decodeblock(com[1])
+                        try:
+                            if any(c.isalpha() for c in com[4]):
+                                store(com[4], t)
+                            else:
+                                store("vtemp", t)
+                        except:
+                            store("vtemp", t)
+
+                case "sneq":                                            # Jumps to a subroutine if both inputs are not equal                                                        eq [block] [in1] [in2] ?[out]
+                    if not parsearg(com[2]) == parsearg(com[3]):
+                        t = decodeblock(com[1])
+                        try:
+                            if any(c.isalpha() for c in com[4]):
+                                store(com[4], t)
+                            else:
+                                store("vtemp", t)
+                        except:
+                            store("vtemp", t)
+
                 case _:
                     pass
 
