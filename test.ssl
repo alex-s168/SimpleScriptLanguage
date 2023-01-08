@@ -1,0 +1,17 @@
+gentemp i10 i
+gentemp i10 s
+
+var sum i0
+
+loop i101 1
+
+sto sErgebis_ist: vtmp10
+repl s_ _space vtmp10 vtmp10
+log vtmp10
+log vsum
+end
+
+:1
+grv vtmp0
+add vsum vtmp0 vsum
+return

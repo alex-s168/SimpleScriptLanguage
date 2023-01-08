@@ -9,6 +9,7 @@ varlistv = []
 vartemp = None
 subroutine_params = []
 total_delay = 0
+total_cinput_delay = 0
 
 tempvaramount = 0
 file = "test.ssl"
@@ -20,51 +21,51 @@ for i in range(tempvaramount):
     varlistv.append(None)
 
 
-def store(where, val):
+def store(where, val,bl):
     if where == "vtemp":
-        vartemp = parsearg(val)
+        vartemp = parsearg(val,bl)
     elif where[0] == "v":
         if where[1:] in varlist:
-            varlistv[varlist.index(where[1:])] = parsearg(val)
+            varlistv[varlist.index(where[1:])] = parsearg(val,bl)
         else:
-            print("ERROR: Variable " + where[1:] + " needs to be declared before it can be used!")
+            print("ERROR: Variable " + where[1:] + " needs to be declared before it can be used!",bl)
             sys.exit(-1)
     elif where == "_pass":
         pass
     else:
-        print("ERROR: No storage named ",where , "!")
+        print("ERROR: No storage named ",where , "!",bl)
         sys.exit(-1)
 
-def storeb(where, val):
+def storeb(where, val,bl):
     if where == "vtemp":
         vartemp = val
     elif where[0] == "v":
         if where[1:] in varlist:
             varlistv[varlist.index(where[1:])] = val
         else:
-            print("ERROR: Variable " + where[1:] + " needs to be declared before it can be used!")
+            print("ERROR: Variable " + where[1:] + " needs to be declared before it can be used!",bl)
             sys.exit(-1)
     elif where == "_pass":
         pass
     else:
-        print("ERROR: No storage named ",where , "!")
+        print("ERROR: No storage named ",where , "!",bl)
         sys.exit(-1)
 
-def arrize(r):
+def arrize(r,bl):
     x = r.split(",")
     n =  []
     for i in x:
         n.append(parsearg(i))
     return n
 
-def arrizeb(r):
+def arrizeb(r,bl):
     x = r.split(",")
     n =  []
     for i in x:
         n.append(i)
     return n
 
-def parsearg(arg):
+def parsearg(arg,bl):
     global varlist
     global varlistv
 
@@ -79,7 +80,7 @@ def parsearg(arg):
         if r in varlist:
             return varlistv[varlist.index(r)]
         else:
-            print("ERROR: Variable " + r + " not declared!")
+            print("ERROR: Variable " + r + " not declared!",bl)
             sys.exit(-1)
     if b == "s":
         return str(r)
@@ -91,7 +92,7 @@ def parsearg(arg):
         return bool(r)
     if b == "a":
         return arrize(r)
-    print("ERROR: Datatype " + b + " does not exist!")
+    print("ERROR: Datatype " + b + " does not exist!",bl)
     sys.exit(-1)
 
 time_dec_start = time.time()
@@ -113,6 +114,7 @@ print("Block conversion finished!\n")
 time_dec_end = time.time()
 
 def decodeblock(id):
+    global total_cinput_delay
     global subroutine_params
     global varlist
     global varlistv
@@ -134,6 +136,7 @@ def decodeblock(id):
             return
         else:
             com = blocks[id][line]
+            bl = "File: "+file+" Block: "+str(id)+" Line: "+str(line+1)+" Command: "+com[0].rstrip()
 
             x = 0
             for i in com:
@@ -147,58 +150,84 @@ def decodeblock(id):
                     varlistv.append("")
                     try:
                         if any(c.isalpha() for c in com[2]):
-                            store("v"+com[1], com[2])
+                            store("v"+com[1], com[2], bl)
                     except:
                         pass
 
                 case "sto":                                         # stores something                                                                                              sto [what] [where]
-                    store(com[2], com[1])
+                    if not len(com)-1 == 2:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
+                    store(com[2], com[1],bl)
 
                 case "log":                                         # log to console                                                                                                log [val]
-                    print("LOG: ", parsearg(com[1]))
+                    if not len(com)-1 == 1:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
+                    print("LOG: ", parsearg(com[1],bl))
                 
                 case "end":                                         # ends the script                                                                                               end
+                    if not len(com)-1 < 1:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
                     contdec = False
                     return
 
                 case "jmp":                                         # jumps to a code block and ends decoding of this block                                                         jmp [block]
+                    if not len(com)-1 == 1:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
                     contdec = False
                     decodeblock(com[1])
                 
                 case "jsr":                                         # jumps to a codeblock but continues decoding after the codeblock is finished and stores the ret value          jsr [block] ?[out]
+                    if not len(com)-1 <= 1:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
                     t = decodeblock(com[1])
                     try:
                         if any(c.isalpha() for c in com[2]):
-                            store(com[2], t)
+                            store(com[2], t,bl)
                         else:
-                            store("vtemp", t)
+                            store("vtemp", t,bl)
                     except:
-                        store("vtemp", t)
+                        store("vtemp", t,bl)
                 
                 case "jvsr":                                        # like jsr but also sends args to subroutine                                                                    jvsr [block] [out] [val1] ?[val2] ?[val3] ....
+                    if not len(com)-1 <= 3:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
                     t = decodeblock(com[1])
-                    store(com[2], t)
+                    store(com[2], t,bl)
                     subroutine_params = []
                     for i in com[2:]:
                         if any(c.isalpha() for c in com[2]):
-                            subroutine_params.append(parsearg(i))
+                            subroutine_params.append(parsearg(i,bl))
                 case "ret":                                         # returns a value when block is called from subroutine (to the subroutine command) also stops exec of block     ret ?[val]
+                    if len(com)-1 > 1:
+                        print("ERROR: too much arguments!",bl)
+                        sys.exit(-1)
                     contdec = False
-                    if any(c.isalpha() for c in com[1]):
-                        return com[1]
+                    try:
+                        if any(c.isalpha() for c in com[1]):
+                            return com[1]
+                    except:pass
                     return
 
                 case "grv":                                         # gets subroutine values (when subroutine is called via a value-subroutine command)                             grv [out1] ?[out2] ?[out3] ?[out4] ....
                     c = 0
                     for i in subroutine_params:
                         try:
-                            storeb(com[1+c], i)
+                            storeb(com[1+c], i,bl)
                         except: pass
                         c += 1
                     subroutine_params = []
 
                 case "iter":                                        # iterates over a given list. calls a subroutine with two args: [id] [elem]                                     iter [arr] [block]
-                    l = parsearg(com[1])
+                    if not len(com)-1 == 2:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
+                    l = parsearg(com[1],bl)
                     c = 0
                     for i in l:
                         subroutine_params = [c, i]
@@ -206,7 +235,10 @@ def decodeblock(id):
                         c += 1
 
                 case "loop":                                        # loops X times. calls a subroutine with one arg: [iteration]                                                   loop [amount] [block]
-                    l = parsearg(com[1])
+                    if not len(com)-1 == 2:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
+                    l = parsearg(com[1],bl)
                     c = 0
                     for i in range(l):
                         subroutine_params = [c]
@@ -214,17 +246,23 @@ def decodeblock(id):
                         c += 1
 
                 case "scmb":                                        # Combines multiple strings                                                                                     scmb [out] [in1: s] [in2: s] ?[in3: s] ....
+                    if not len(com)-1 <= 3:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
                     s = ""
                     for i in com[2:]:
                         try:
                             s = s + parsearg(i)
                         except:
-                            print("ERROR: Can only combine strings!")
+                            print("ERROR: Can only combine strings!",bl)
                             sys.exit(-1)
-                    storeb(com[1], s)
+                    storeb(com[1], s,bl)
 
                 case "conv":                                        # Converts a value                                                                                              conv [in] [type] [out]
-                    i = parsearg(com[1])
+                    if not len(com)-1 == 3:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
+                    i = parsearg(com[1],bl)
                     o = None
 
                     match com[2]:
@@ -235,56 +273,78 @@ def decodeblock(id):
                         case "b":
                             o = bool(i)
                         case "a":
-                            o = arrizeb(i)
+                            o = arrizeb(i,bl)
                         case "f":
                             o = float(i)
                         case _:
-                            print("ERROR: Type ",com[2], " not found!")
+                            print("ERROR: Type ",com[2], " not found!",bl)
                             sys.exit(-1)
                     
-                    storeb(com[3], o)
+                    storeb(com[3], o,bl)
 
                 case "aapp":                                         # Appends a value to a array                                                                                   aap [in] [element] [out]
-                    il  = parsearg(com[1])
-                    ie  = parsearg(com[2])
+                    if not len(com)-1 == 3:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
+                    il  = parsearg(com[1],bl)
+                    ie  = parsearg(com[2],bl)
                     nl = il
 
                     nl.append(ie)
 
-                    storeb(com[3], nl)
+                    storeb(com[3], nl,bl)
 
                 case "clv":                                          # Clears a value (sets to none)                                                                                clv [out]
-                    storeb(com[1], None)
+                    if not len(com)-1 == 1:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
+                    storeb(com[1], None,bl)
 
                 case "add":                                          # do simple math stuff (add)                                                                                   add [in1] [in2] [out]
-                    i1 = parsearg(com[1])
-                    i2 = parsearg(com[2])
+                    if not len(com)-1 == 3:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
+                    i1 = parsearg(com[1],bl)
+                    i2 = parsearg(com[2],bl)
+
                     o = i1 + i2
 
-                    storeb(com[3], o)
+                    storeb(com[3], o,bl)
                 
                 case "sub":                                          # do simple math stuff (sub)                                                                                   sub [in1] [in2] [out]
-                    i1 = parsearg(com[1])
-                    i2 = parsearg(com[2])
+                    if not len(com)-1 == 3:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
+                    i1 = parsearg(com[1],bl)
+                    i2 = parsearg(com[2],bl)
                     o = i1 - i2
 
-                    storeb(com[3], o)
+                    storeb(com[3], o,bl)
 
                 case "mul":                                          # do simple math stuff (mul)                                                                                   mul [in1] [in2] [out]
-                    i1 = parsearg(com[1])
-                    i2 = parsearg(com[2])
+                    if not len(com)-1 == 3:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
+                    i1 = parsearg(com[1],bl)
+                    i2 = parsearg(com[2],bl)
                     o = i1 * i2
 
-                    storeb(com[3], o)
+                    storeb(com[3], o,bl)
 
                 case "div":                                          # do simple math stuff (div)                                                                                   div [in1] [in2] [out]
-                    i1 = parsearg(com[1])
-                    i2 = parsearg(com[2])
+                    if not len(com)-1 == 3:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
+                    i1 = parsearg(com[1],bl)
+                    i2 = parsearg(com[2],bl)
                     o = i1 / i2
 
-                    storeb(com[3], o)
+                    storeb(com[3], o,bl)
 
                 case "st":                                           # set type of variable                                                                                         st [out] [type]
+                    if not len(com)-1 == 2:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
                     o = None
                     match com[2]:
                         case "s":
@@ -298,15 +358,21 @@ def decodeblock(id):
                         case "f":
                             o = 0.0
                         case _:
-                            print("ERROR: Type ",com[2], " not found!")
+                            print("ERROR: Type ",com[2], " not found!",bl)
                             sys.exit(-1)
-                    storeb(com[1], o)
+                    storeb(com[1], o,bl)
                 
                 case "delay":                                        # waits for X seconds, then continues                                                                          delay [ms]
-                    total_delay += parsearg(com[1])/1000
-                    time.sleep(parsearg(com[1])/1000) 
+                    if not len(com)-1 == 1:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
+                    total_delay += parsearg(com[1],bl)/1000
+                    time.sleep(parsearg(com[1],bl)/1000) 
                 
                 case "gentemp":                                      # generates temp variables                                                                                     gentemp [amount] ?[type]
+                    if not len(com)-1 <= 2:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
                     if any(c.isalpha() for c in com[2]):
                         o = None
                         match com[2]:
@@ -321,58 +387,78 @@ def decodeblock(id):
                             case "f":
                                 o = 0.0
                             case _:
-                                print("ERROR: Type ",com[2], " not found!")
+                                print("ERROR: Type ",com[2], " not found!",bl)
                                 sys.exit(-1)
-                        for i in range(parsearg(com[1])):
+                        for i in range(parsearg(com[1],bl )):
                             varlist.append("tmp"+str(i+tempvaramount))
                             varlistv.append(None)
-                            storeb("vtmp"+str(i+tempvaramount), o)
-                        tempvaramount += parsearg(com[1])
+                            storeb("vtmp"+str(i+tempvaramount), o,bl)
+                        tempvaramount += parsearg(com[1],bl)
                             
                     else:
-                        for i in range(parsearg(com[1])):
+                        for i in range(parsearg(com[1],bl)):
                             varlist.append("tmp"+str(i+tempvaramount))
                             varlistv.append(None)
                         
                 case "repl":                                           # replaces a element (string) in a string                                                                    repl [what] [with] [string] [out]
-                    s = parsearg(com[3])
-                    o = s.replace(parsearg(com[1]), parsearg(com[2]))
-                    storeb(com[4], o)
+                    if not len(com)-1 == 4:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
+                    s = parsearg(com[3],bl)
+                    o = s.replace(parsearg(com[1],bl), parsearg(com[2],bl))
+                    storeb(com[4], o,bl)
 
                 case "eq":                                             # Jumps to a block if both inputs are equal                                                                  eq [block] [in1] [in2]
-                    if parsearg(com[2]) == parsearg(com[3]):
+                    if not len(com)-1 == 3:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
+                    if parsearg(com[2],bl) == parsearg(com[3],bl):
                         contdec = False
                         decodeblock(com[1])
 
-                case "neq":                                            # Jumps to a block if both inputs are not equal                                                              eq [block] [in1] [in2]
-                    if not parsearg(com[2]) == parsearg(com[3]):
+                case "neq":                                            # Jumps to a block if both inputs are not equal                                                              neq [block] [in1] [in2]
+                    if not len(com)-1 == 3:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
+                    if not parsearg(com[2],bl) == parsearg(com[3],bl):
                         contdec = False
                         decodeblock(com[1])
                 
-                case "seq":                                             # Jumps to a subroutine if both inputs are equal                                                            eq [block] [in1] [in2] ?[out]
-                    if parsearg(com[2]) == parsearg(com[3]):
+                case "seq":                                             # Jumps to a subroutine if both inputs are equal                                                            seq [block] [in1] [in2] ?[out]
+                    if not len(com)-1 <= 3:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
+                    if parsearg(com[2],bl) == parsearg(com[3],bl):
                         t = decodeblock(com[1])
                         try:
                             if any(c.isalpha() for c in com[4]):
-                                store(com[4], t)
+                                store(com[4], t,bl)
                             else:
-                                store("vtemp", t)
+                                store("vtemp", t,bl)
                         except:
-                            store("vtemp", t)
+                            store("vtemp", t,bl)
 
-                case "sneq":                                            # Jumps to a subroutine if both inputs are not equal                                                        eq [block] [in1] [in2] ?[out]
-                    if not parsearg(com[2]) == parsearg(com[3]):
+                case "sneq":                                            # Jumps to a subroutine if both inputs are not equal                                                        sneq [block] [in1] [in2] ?[out]
+                    if not len(com)-1 <= 3:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
+                    if not parsearg(com[2],bl) == parsearg(com[3],bl):
                         t = decodeblock(com[1])
                         try:
                             if any(c.isalpha() for c in com[4]):
-                                store(com[4], t)
+                                store(com[4], t,bl)
                             else:
-                                store("vtemp", t)
+                                store("vtemp", t,bl)
                         except:
-                            store("vtemp", t)
+                            store("vtemp", t,bl)
 
                 case "cinput":                                          # gets input from console                                                                                   cinput [out]
-                    storeb(com[1],input())
+                    if not len(com)-1 == 1:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
+                    x = time.time()
+                    storeb(com[1],input(),bl)
+                    total_cinput_delay += time.time() - x
 
                 case _:
                     pass
@@ -391,7 +477,7 @@ import os, psutil; used_mem = psutil.Process(os.getpid()).memory_info().rss / 10
 print("\nProgramm Finished!\n")
 print("dev data:")
 print("runtime: PYTHON-3.10-STANDARD-INTERPRETER")
-print("version: alpha.0.7 (08.01.2023)")
+print("version: alpha.0.8 (08.01.2023)")
 print("total variables: ",len(varlist))
 print("- user variables: ",len(varlist)-tempvaramount)
 print("- temp variables: ",tempvaramount)
@@ -400,6 +486,7 @@ print("total time: ",(time_total_end-time_total_start)* 1000," ms")
 print("- decode time: ",(time_dec_end-time_dec_start)* 1000," ms")
 print("- run time: ",(time_run_end-time_run_start)* 1000," ms")
 print("- - run time (no delay): ",(time_run_end-time_run_start-total_delay)* 1000," ms (might be unaccurate when delay is used)")
+print("- - run time (no delay + no cinput): ",(time_run_end-time_run_start-total_delay-total_cinput_delay)* 1000," ms (might be unaccurate when cinput or delay is used)")
 print("used memory: ",used_mem," MB")
 print("- runtime: ",14," MB (inaccurate)")
 print("- interpreter: ",used_mem-14," MB (inaccurate)")
