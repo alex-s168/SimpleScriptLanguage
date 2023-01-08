@@ -102,10 +102,12 @@ with open(file) as file_in:
     curr_block = 0
     for line in file_in:
         if line.startswith(":"):
-            curr_block = int(line[1:])
+            xc = (line+"#").split("#")[0]
+            curr_block = int(xc[1:])
             blocks.insert(curr_block, [])
         else: 
-            blocks[curr_block].append(line.split(" "))
+            xc = (line+"#").split("#")[0]
+            blocks[curr_block].append(xc.split(" "))
 
 print("Block conversion finished!\n")
 time_dec_end = time.time()
@@ -315,7 +317,7 @@ def decodeblock(id):
                             case "b":
                                 o = False
                             case "a":
-                                o = []
+                                o = [] 
                             case "f":
                                 o = 0.0
                             case _:
@@ -368,6 +370,9 @@ def decodeblock(id):
                                 store("vtemp", t)
                         except:
                             store("vtemp", t)
+
+                case "cinput":                                          # gets input from console                                                                                   cinput [out]
+                    storeb(com[1],input())
 
                 case _:
                     pass
