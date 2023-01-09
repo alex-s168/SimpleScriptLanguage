@@ -1,17 +1,18 @@
-gentemp i10 i
 gentemp i10 s
+var test sHallo,_das_ist_ein_test!
+spaceify vtest s_ vtest
 
-var sum i0
+log vtest
 
-loop i101 1
+sarrify vtest vtest
 
-sto sErgebis_ist: vtmp10
-repl s_ _space vtmp10 vtmp10
-log vtmp10
-log vsum
+log vtest
+
+iter vtest 1
+
 end
 
 :1
-grv vtmp0
-add vsum vtmp0 vsum
-return
+grv _pass vtmp0
+log vtmp0
+ret

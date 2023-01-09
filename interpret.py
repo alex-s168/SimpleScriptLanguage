@@ -294,6 +294,73 @@ def decodeblock(id):
 
                     storeb(com[3], nl,bl)
 
+                case "spaceify":                                     # replaces all X with spaces of an string                                                                      spaceify [in] [what] [out]
+                    if not len(com)-1 == 3:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
+                    o = parsearg(com[1],bl).replace(parsearg(com[2],bl), " ")
+                    storeb(com[3], o, bl)
+
+                case "sarrify":                                      # converst string to a char-array                                                                              sarrify [in] [out]
+                    if not len(com)-1 == 2:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
+                    
+                    storeb(com[2], [*parsearg(com[1],bl)], bl)
+
+                case "aget":                                         # gets a value of an array                                                                                     aget [in] [pos] [out]
+                    if not len(com)-1 == 3:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
+                    il  = parsearg(com[1],bl)
+                    ip  = parsearg(com[2],bl)
+                    
+                    o = il[ip]
+
+                    storeb(com[3], o,bl)
+
+                case "aset":                                         # sets a value of an array                                                                                     aset [in] [pos] [val] [out]
+                    if not len(com)-1 == 4:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
+                    il  = parsearg(com[1],bl)
+                    ip  = parsearg(com[2],bl)
+                    iv = parsearg(com[3],bl)
+
+                    il[ip] = iv
+
+                    storeb(com[4], il,bl)
+
+                case "alen":                                         # gets the length of an array                                                                                  alen [in] [out]
+                    if not len(com)-1 == 2:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
+                    il  = parsearg(com[1],bl)
+
+                    o = len(il)
+
+                    storeb(com[2], o,bl)
+
+                case "aext":                                         # extends a array with another array                                                                           aext [in] [in2] [out]
+                    if not len(com)-1 == 3:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
+                    il  = parsearg(com[1],bl)
+                    ie  = parsearg(com[2],bl)
+                    nl = il
+
+                    nl.extend(ie)
+
+                    storeb(com[3], nl,bl)
+
+                case "asplit":                                       # splits a string and returns a array                                                                          asplit [in] [at] [out]
+                    if not len(com)-1 == 3:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                    i1  = parsearg(com[1],bl)
+                    i2  = parsearg(com[2],bl)
+                    nl = i1.split(i2) 
+
+                    storeb(com[3], nl,bl)
                 case "clv":                                          # Clears a value (sets to none)                                                                                clv [out]
                     if not len(com)-1 == 1:
                         print("ERROR: missing arguments / too much arguments!",bl)
@@ -461,7 +528,9 @@ def decodeblock(id):
                     total_cinput_delay += time.time() - x
 
                 case _:
-                    pass
+                    if any(c.isalpha() for c in com[0]):
+                        print("ERROR: command not found!",bl)
+                        sys.exit(-1)
 
             line += 1
 
@@ -476,8 +545,8 @@ import os, psutil; used_mem = psutil.Process(os.getpid()).memory_info().rss / 10
 
 print("\nProgramm Finished!\n")
 print("dev data:")
-print("runtime: PYTHON-3.10-STANDARD-INTERPRETER")
-print("version: alpha.0.8 (08.01.2023)")
+print("runtime: PYTHON-3-STANDARD-INTERPRETER")
+print("version: alpha.0.9 (09.01.2023)")
 print("total variables: ",len(varlist))
 print("- user variables: ",len(varlist)-tempvaramount)
 print("- temp variables: ",tempvaramount)
