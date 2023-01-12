@@ -119,7 +119,7 @@ def blockconvert(file):
         curr_block = "__main__"
         for line in file_in:
             if line.startswith(":"):
-                xc = (line+"#").split("#")[0]
+                xc = ((line+"#").split("#")[0]).rstrip().lstrip()
                 bl.append([])
                 bn.append(str(xc[1:]))
                 curr_block = xc[1:]
@@ -598,6 +598,8 @@ def decodeblock(name):
             line += 1
 
 time_run_start = time.time()
+
+print(blocknames)
 
 decodeblock("__main__")
 
