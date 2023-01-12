@@ -1,5 +1,6 @@
 import time
 import sys
+import math
 
 time_total_start = time.time()
 
@@ -480,6 +481,33 @@ def decodeblock(name):
                     o = i1 % i2
 
                     storeb(com[3], o,bl)
+                    
+                case "sin":                                          # do simple math stuff (sin)                                                                                   sin [in1] [out]
+                    if not len(com)-1 == 2:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
+                    i1 = parsearg(com[1],bl)
+                    o = math.sin(i1)
+
+                    storeb(com[2], o,bl)
+                    
+                case "cos":                                          # do simple math stuff (cos)                                                                                   cos [in1] [out]
+                    if not len(com)-1 == 2:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
+                    i1 = parsearg(com[1],bl)
+                    o = math.cos(i1)
+
+                    storeb(com[2], o,bl)
+                    
+                case "tan":                                          # do simple math stuff (tan)                                                                                   tan [in1] [out]
+                    if not len(com)-1 == 2:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
+                    i1 = parsearg(com[1],bl)
+                    o = math.tan(i1)
+
+                    storeb(com[2], o,bl)
 
                 case "st":                                           # set type of variable                                                                                         st [out] [type]
                     if not len(com)-1 == 2:
