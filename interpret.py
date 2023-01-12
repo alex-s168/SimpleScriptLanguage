@@ -167,6 +167,7 @@ def decodeblock(name):
     global tempvaramount
     global blocks
     global imported_blocks
+    global blocknames
 
     contdec = True
     line = 0
@@ -186,25 +187,16 @@ def decodeblock(name):
 
             match com[0]:
 
-                # uncomment later when block naming system is finished
-                #case "lcfb":                                        # load code file blocks                                                                                         lcfb [filename] [insert begining] [?from] ?[to]
-                #    if len(com)-1 > 4 or len(com)-1 < 2:
-                #        print("ERROR: missing arguments / too much arguments!",bl)
-                #        sys.exit(-1)
-                #    a_filename = parsearg(com[1],bl)
-                #    a_insertbeginning = parsearg(com[2],bl)
-                #
-                #    try:
-                #        if any(c.isalpha() for c in com[3]):
-                #            a_from = parsearg(com[3],bl)
-                #            a_to = parsearg(com[4],bl)
-                #
-                #            imported_blocks = insext(imported_blocks, blockconvert(a_filename)[a_from:a_to], a_insertbeginning)    
-                #
-                #    except: pass
-                #
-                #    else:
-                #        imported_blocks = insext(imported_blocks, blockconvert(a_filename), a_insertbeginning)
+                case "lcfb":                                        # load code file blocks                                                                                         lcfb [filename]
+                    if len(com)-1 > 1 or len(com)-1 < 1:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
+                    a_filename = str(com[1])
+
+                    bc = blockconvert(a_filename)
+
+                    blocks.extend(bc[0])
+                    blocknames.extend(bc[1])
 
                 case "var":                                         # creates a variable                                                                                            var [name] ?[value]
                     if len(com)-1 > 2 or len(com)-1 < 1:
@@ -252,9 +244,8 @@ def decodeblock(name):
                     try:
                         if any(c.isalpha() for c in com[2]):
                             store(com[2], t,bl)
-                        else:
-                            store("vtemp", t,bl)
-                    except:
+                    except: pass
+                    else:
                         store("vtemp", t,bl)
                 
                 case "jvsr":                                        # like jsr but also sends args to subroutine                                                                    jvsr [block] [out] [val1] ?[val2] ?[val3] ....
