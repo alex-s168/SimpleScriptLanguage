@@ -470,6 +470,16 @@ def decodeblock(name):
                     o = i1 / i2
 
                     storeb(com[3], o,bl)
+                    
+                case "mod":                                          # do simple math stuff (mod)                                                                                   mod [in1] [in2] [out]
+                    if not len(com)-1 == 3:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
+                    i1 = parsearg(com[1],bl)
+                    i2 = parsearg(com[2],bl)
+                    o = i1 % i2
+
+                    storeb(com[3], o,bl)
 
                 case "st":                                           # set type of variable                                                                                         st [out] [type]
                     if not len(com)-1 == 2:
