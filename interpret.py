@@ -3,6 +3,7 @@ import sys
 
 time_total_start = time.time()
 
+blocknames = []
 blocks = []
 varlist = []
 varlistv = []
@@ -11,10 +12,10 @@ subroutine_params = []
 total_delay = 0
 total_cinput_delay = 0
 
+imported_blocks = []
+
 tempvaramount = 0
 file = "test.ssl"
-
-blocks.append([])
 
 for i in range(tempvaramount):
     varlist.append("tmp"+str(i))
@@ -95,48 +96,87 @@ def parsearg(arg,bl):
     print("ERROR: Datatype " + b + " does not exist!",bl)
     sys.exit(-1)
 
+def getindexname(arr2, search):
+    x = 0
+    o = None
+    for i in arr2:
+        if i == search:
+            o = x
+            break
+        x += 1
+    return o
+
+def blockconvert(file):
+    bl = []
+    bn = []
+
+    bl.append([])
+    bn.append("__main__")
+
+    print("\nBLOCKIFIER: Starting block conversion of file: "+file)
+
+    with open(file) as file_in:
+        curr_block = "__main__"
+        for line in file_in:
+            if line.startswith(":"):
+                xc = (line+"#").split("#")[0]
+                bl.append([])
+                bn.append(str(xc[1:]))
+                curr_block = xc[1:]
+            else: 
+                xc = (line+"#").split("#")[0]
+                bl[getindexname(bn, curr_block)].append(xc.split(" "))
+    
+    print("BLOCKIFIER: Block conversion finished!\nBLOCKIFIER: Added",len(bl),"blocks!\n")
+
+    return [bl, bn]
+
 time_dec_start = time.time()
-
-print("\nStarting block conversion of file: "+file)
-
-with open(file) as file_in:
-    curr_block = 0
-    for line in file_in:
-        if line.startswith(":"):
-            xc = (line+"#").split("#")[0]
-            curr_block = int(xc[1:])
-            blocks.insert(curr_block, [])
-        else: 
-            xc = (line+"#").split("#")[0]
-            blocks[curr_block].append(xc.split(" "))
-
-print("Block conversion finished!\n")
+t = blockconvert(file)
+blocks = t[0]
+blocknames = t[1]
 time_dec_end = time.time()
 
-def decodeblock(id):
+def insext(list: list, list2: list, pos: int):
+    l = list
+
+    c = pos
+    for i in list2:
+        l.insert(c, i)
+        c+= 1
+
+    return l
+
+def getblock(name):
+    global blocknames
+    global blocks
+
+    try:
+        return blocks[getindexname(blocknames, str(name))]
+    except:
+        print("ERROR: Block",name, "not found!")
+        sys.exit(-1)
+
+def decodeblock(name):
     global total_cinput_delay
     global subroutine_params
     global varlist
     global varlistv
     global total_delay
     global tempvaramount
-
-    id = int(id)
-
-    if len(blocks)-1 < id:
-        return
+    global blocks
+    global imported_blocks
 
     contdec = True
     line = 0
 
     while contdec:
-        if (line > len(blocks[id])-1) or (id > len(blocks)-1):
-            contdec = False
-            decodeblock(id+1)
-            return
+        # todo!
+        if False:
+            pass
         else:
-            com = blocks[id][line]
-            bl = "File: "+file+" Block: "+str(id)+" Line: "+str(line+1)+" Command: "+com[0].rstrip()
+            com = getblock(name)[line]
+            bl = "File: "+file+" Block: "+str(name)+" Line: "+str(line+1)+" Command: "+com[0].rstrip()
 
             x = 0
             for i in com:
@@ -144,8 +184,31 @@ def decodeblock(id):
                 x += 1
 
             match com[0]:
-                
+
+                # uncomment later when block naming system is finished
+                #case "lcfb":                                        # load code file blocks                                                                                         lcfb [filename] [insert begining] [?from] ?[to]
+                #    if len(com)-1 > 4 or len(com)-1 < 2:
+                #        print("ERROR: missing arguments / too much arguments!",bl)
+                #        sys.exit(-1)
+                #    a_filename = parsearg(com[1],bl)
+                #    a_insertbeginning = parsearg(com[2],bl)
+                #
+                #    try:
+                #        if any(c.isalpha() for c in com[3]):
+                #            a_from = parsearg(com[3],bl)
+                #            a_to = parsearg(com[4],bl)
+                #
+                #            imported_blocks = insext(imported_blocks, blockconvert(a_filename)[a_from:a_to], a_insertbeginning)    
+                #
+                #    except: pass
+                #
+                #    else:
+                #        imported_blocks = insext(imported_blocks, blockconvert(a_filename), a_insertbeginning)
+
                 case "var":                                         # creates a variable                                                                                            var [name] ?[value]
+                    if len(com)-1 > 2 or len(com)-1 < 1:
+                        print("ERROR: missing arguments / too much arguments!",bl)
+                        sys.exit(-1)
                     varlist.append(com[1])
                     varlistv.append("")
                     try:
@@ -536,7 +599,7 @@ def decodeblock(id):
 
 time_run_start = time.time()
 
-decodeblock(0)
+decodeblock("__main__")
 
 time_run_end = time.time()
 time_total_end = time.time()
@@ -546,11 +609,13 @@ import os, psutil; used_mem = psutil.Process(os.getpid()).memory_info().rss / 10
 print("\nProgramm Finished!\n")
 print("dev data:")
 print("runtime: PYTHON-3-STANDARD-INTERPRETER")
-print("version: alpha.0.9 (09.01.2023)")
+print("version: alpha.0.10 (12.01.2023)")
 print("total variables: ",len(varlist))
 print("- user variables: ",len(varlist)-tempvaramount)
 print("- temp variables: ",tempvaramount)
-print("total blocks: ",len(blocks))
+print("total blocks: ",len(blocks)+len(imported_blocks))
+print("- local blocks: ",len(blocks))
+print("- imported blocks: ",len(imported_blocks))
 print("total time: ",(time_total_end-time_total_start)* 1000," ms")
 print("- decode time: ",(time_dec_end-time_dec_start)* 1000," ms")
 print("- run time: ",(time_run_end-time_run_start)* 1000," ms")
