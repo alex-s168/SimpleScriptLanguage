@@ -9,9 +9,8 @@ import storage
 
 
 def command(args, optargs, bl):
-    a_filename = str(main.parsearg(args[0], bl))
-
-    bc = main.blockconvert(a_filename)
-
-    storage.blocks.extend(bc[0])
-    storage.blocknames.extend(bc[1])
+    try:
+        optargs[0]
+        sys.exit("Programm stopped! " + main.parsearg(optargs[0], bl))
+    except:
+        sys.exit("Programm stopped!")

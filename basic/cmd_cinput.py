@@ -5,13 +5,11 @@ parent = os.path.dirname(current)
 sys.path.append(parent)
 import interpret as main
 import storage
+import time
 
 
 
 def command(args, optargs, bl):
-    a_filename = str(main.parsearg(args[0], bl))
-
-    bc = main.blockconvert(a_filename)
-
-    storage.blocks.extend(bc[0])
-    storage.blocknames.extend(bc[1])
+    x = time.time()
+    main.storeb(args[0], input(), bl)
+    storage.total_cinput_delay += time.time() - x

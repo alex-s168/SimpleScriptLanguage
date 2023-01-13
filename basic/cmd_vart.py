@@ -9,9 +9,8 @@ import storage
 
 
 def command(args, optargs, bl):
-    a_filename = str(main.parsearg(args[0], bl))
+    storage.varlist.append(main.parsearg(args[0], bl))
+    storage.varlistv.append("")
 
-    bc = main.blockconvert(a_filename)
-
-    storage.blocks.extend(bc[0])
-    storage.blocknames.extend(bc[1])
+    if len(optargs) > 0:
+        main.store("v"+args[0], optargs[0], bl)

@@ -5,13 +5,10 @@ parent = os.path.dirname(current)
 sys.path.append(parent)
 import interpret as main
 import storage
+import time
 
 
 
 def command(args, optargs, bl):
-    a_filename = str(main.parsearg(args[0], bl))
-
-    bc = main.blockconvert(a_filename)
-
-    storage.blocks.extend(bc[0])
-    storage.blocknames.extend(bc[1])
+    total_delay += main.parsearg(args[0], bl) / 1000
+    time.sleep(main.parsearg(args[0], bl) / 1000) 

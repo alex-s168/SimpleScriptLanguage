@@ -147,8 +147,8 @@ def blockconvert(file):
 if __name__ == "__main__":
     time_dec_start = time.time()
     t = blockconvert(storage.file)
-    blocks = t[0]
-    blocknames = t[1]
+    storage.blocks = t[0]
+    storage.blocknames = t[1]
     time_dec_end = time.time()
 
 def insext(list: list, list2: list, pos: int):
@@ -162,11 +162,8 @@ def insext(list: list, list2: list, pos: int):
     return l
 
 def getblock(name):
-    global blocknames
-    global blocks
-
     try:
-        return blocks[getindexname(blocknames, str(name))]
+        return storage.blocks[getindexname(storage.blocknames, str(name))]
     except:
         print("ERROR: Block",name, "not found!")
         sys.exit(-1)
@@ -211,39 +208,7 @@ def decodeblock(name, _bl):
             #   errorprinter("Command not found!", bl)
 
 
-
-
             match com[0]:
-
-                #case "lcfb":                                        # load code file blocks                                                                                         lcfb [filename]
-                #    if len(com)-1 > 1 or len(com)-1 < 1:
-                #        print("ERROR: missing arguments / too much arguments!",bl)
-                #        sys.exit(-1)
-                #    a_filename = str(com[1])
-#
-                #    bc = blockconvert(a_filename)
-#
-                #    blocks.extend(bc[0])
-                #    blocknames.extend(bc[1])
-
-                case "sto":                                         # stores something                                                                                              sto [what] [where]
-                    if not len(com)-1 == 2:
-                        print("ERROR: missing arguments / too much arguments!",bl)
-                        sys.exit(-1)
-                    store(com[2], com[1],bl)
-
-                case "log":                                         # log to console                                                                                                log [val]
-                    if not len(com)-1 == 1:
-                        print("ERROR: missing arguments / too much arguments!",bl)
-                        sys.exit(-1)
-                    print("LOG: ", parsearg(com[1],bl))
-                
-                case "end":                                         # ends the script                                                                                               end
-                    if not len(com)-1 < 1:
-                        print("ERROR: missing arguments / too much arguments!",bl)
-                        sys.exit(-1)
-                    contdec = False
-                    return
 
                 case "jmp":                                         # jumps to a code block and ends decoding of this block                                                         jmp [block]
                     if not len(com)-1 == 1:
@@ -536,44 +501,6 @@ def decodeblock(name, _bl):
                             print("ERROR: Type ",com[2], " not found!",bl)
                             sys.exit(-1)
                     storeb(com[1], o,bl)
-                
-                case "delay":                                        # waits for X seconds, then continues                                                                          delay [ms]
-                    if not len(com)-1 == 1:
-                        print("ERROR: missing arguments / too much arguments!",bl)
-                        sys.exit(-1)
-                    total_delay += parsearg(com[1],bl)/1000
-                    time.sleep(parsearg(com[1],bl)/1000) 
-                
-                case "gentemp":                                      # generates temp variables                                                                                     gentemp [amount] ?[type]
-                    if not len(com)-1 <= 2:
-                        print("ERROR: missing arguments / too much arguments!",bl)
-                        sys.exit(-1)
-                    if any(c.isalpha() for c in com[2]):
-                        o = None
-                        match com[2]:
-                            case "s": 
-                                o = ""
-                            case "i":
-                                o = 0
-                            case "b":
-                                o = False
-                            case "a":
-                                o = [] 
-                            case "f":
-                                o = 0.0
-                            case _:
-                                print("ERROR: Type ",com[2], " not found!",bl)
-                                sys.exit(-1)
-                        for i in range(parsearg(com[1],bl )):
-                            storage.varlist.append("tmp"+str(i+storage.tempvaramount))
-                            storage.varlistv.append(None)
-                            storeb("vtmp"+str(i+storage.tempvaramount), o,bl)
-                        storage.tempvaramount += parsearg(com[1],bl)
-                            
-                    else:
-                        for i in range(parsearg(com[1],bl)):
-                            storage.varlist.append("tmp"+str(i+storage.tempvaramount))
-                            storage.varlistv.append(None)
                         
                 case "repl":                                           # replaces a element (string) in a string                                                                    repl [what] [with] [string] [out]
                     if not len(com)-1 == 4:
@@ -627,22 +554,10 @@ def decodeblock(name, _bl):
                         except:
                             store("vtemp", t,bl)
 
-                case "cinput":                                          # gets input from console                                                                                   cinput [out]
-                    if not len(com)-1 == 1:
-                        print("ERROR: missing arguments / too much arguments!",bl)
-                        sys.exit(-1)
-                    x = time.time()
-                    storeb(com[1],input(),bl)
-                    total_cinput_delay += time.time() - x
-
                 case _:
                     pass
-                    #outdated
-                    #if any(c.isalpha() for c in com[0]):
-                    #    print("ERROR: command not found!",bl)
-                    #    sys.exit(-1)
 
-            line += 1
+            line += 1 
 
 time_run_start = time.time()
 
@@ -658,18 +573,19 @@ if __name__ == "__main__":
     print("\nProgramm Finished!\n")
     print("dev data:")
     print("runtime: PYTHON-3-STANDARD-INTERPRETER")
-    print("version: alpha.0.10 (12.01.2023)")
-    print("total variables: ",len(storage.varlist))
-    print("- user variables: ",len(storage.varlist)-storage.tempvaramount)
-    print("- temp variables: ",storage.tempvaramount)
-    print("total blocks: ",len(blocks)+len(storage.imported_blocks))
-    print("- local blocks: ",len(blocks))
-    print("- imported blocks: ",len(storage.imported_blocks))
-    print("total time: ",(time_total_end-time_total_start)* 1000," ms")
-    print("- decode time: ",(time_dec_end-time_dec_start)* 1000," ms")
-    print("- run time: ",(time_run_end-time_run_start)* 1000," ms")
-    print("- - run time (no delay): ",(time_run_end-time_run_start-storage.total_delay)* 1000," ms (might be unaccurate when delay is used)")
-    print("- - run time (no delay + no cinput): ",(time_run_end-time_run_start-storage.total_delay-storage.total_cinput_delay)* 1000," ms (might be unaccurate when cinput or delay is used)")
-    print("used memory: ",used_mem," MB")
-    print("- runtime: ",14," MB (inaccurate)")
-    print("- interpreter: ",used_mem-14," MB (inaccurate)")
+    print("version: alpha.0.11 (13.01.2023)")
+    print("total variables:",len(storage.varlist))
+    print("- user variables:",len(storage.varlist)-storage.tempvaramount)
+    print("- temp variables:",storage.tempvaramount)
+    print("total blocks:",len(storage.blocks)+len(storage.imported_blocks))
+    print("- local blocks:",len(storage.blocks))
+    print("- imported blocks:",len(storage.imported_blocks))
+    print("total time:",(time_total_end-time_total_start)* 1000,"ms")
+    print("- decode time:",(time_dec_end-time_dec_start)* 1000,"ms")
+    print("- run time:",(time_run_end-time_run_start)* 1000,"ms")
+    print("- - run time (no delay):",(time_run_end-time_run_start-storage.total_delay)* 1000,"ms (might be unaccurate when delay is used)")
+    print("- - run time (no delay + no cinput):",(time_run_end-time_run_start-storage.total_delay-storage.total_cinput_delay)* 1000,"ms (might be unaccurate when cinput or delay is used)")
+    print("used memory:",used_mem,"MB")
+    print("- main:",storage.get_var_size()*0.000001,"MB")
+    print("- runtime:",14,"MB (inaccurate)")
+    print("- interpreter:",used_mem-14,"MB (inaccurate)")
