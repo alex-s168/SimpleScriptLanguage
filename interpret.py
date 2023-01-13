@@ -2,26 +2,29 @@ import time
 import sys
 import math
 
-import basic.basic_cmdl as basic_cmdl
-import arrays.arrays_cmdl as array_cmdl
-import blocks.blocks_cmdl as blocks_cmdl
-import maths.maths_cmdl as math_cmdl
-import strings.strings_cmdl as strings_cmdl
-import utils.utils_cmdl as utils_cmdl
+if __name__ == "__main__":
+    import basic.basic_cmdl as basic_cmdl
+    import arrays.arrays_cmdl as array_cmdl
+    import blocks.blocks_cmdl as blocks_cmdl
+    import maths.maths_cmdl as math_cmdl
+    import strings.strings_cmdl as strings_cmdl
+    import utils.utils_cmdl as utils_cmdl
 
 import storage
 
-time_total_start = time.time()
+if __name__ == "__main__":
+    time_total_start = time.time()
 
-for i in range(storage.tempvaramount):
-    storage.varlist.append("tmp"+str(i))
-    storage.varlistv.append(None)
+    for i in range(storage.tempvaramount):
+        storage.varlist.append("tmp"+str(i))
+        storage.varlistv.append(None)
 
 def errorprinter(error, bl):
     print("\nERROR: "+error)
     print("Stacktrace:")
     for i in bl[1:]:
         print("Block:",i[0],i[1])
+    sys.exit()
 
 def store(where, val,bl):
     if where == "vtemp":
@@ -40,18 +43,16 @@ def store(where, val,bl):
 
 def storeb(where, val,bl):
     if where == "vtemp":
-        vartemp = val
+        storage.vartemp = val
     elif where[0] == "v":
         if where[1:] in storage.varlist:
             storage.varlistv[storage.varlist.index(where[1:])] = val
         else:
             errorprinter("Variable " + where[1:] + " needs to be declared before it can be used!",bl)
-            sys.exit(-1)
     elif where == "_pass":
         pass
     else:
         errorprinter("No storage named ",where , "!",bl)
-        sys.exit(-1)
 
 def arrize(r,bl):
     x = r.split(",")
@@ -80,7 +81,6 @@ def parsearg(arg,bl):
             return storage.varlistv[storage.varlist.index(r)]
         else:
             errorprinter("Variable " + r + " not declared!",bl)
-            sys.exit(-1)
     if b == "s":
         return str(r)
     if b == "i":
@@ -114,7 +114,7 @@ class command:
     def call(self, bl: str, arglist: list):
         if len(arglist) < self.args:
             errorprinter("missing arguments!", bl)
-        if len(arglist) > self.optargs + self.args:
+        if (len(arglist) > self.optargs + self.args) and not self.optargs == -1:
             errorprinter("too much arguments arguments!", bl)
         
         self.func(arglist[:self.args], arglist[self.optargs:], bl)
@@ -178,7 +178,11 @@ def decodeblock(name, _bl):
         if False:
             pass
         else:
-            com = getblock(name)[line]
+            try:
+                com = getblock(name)[line]
+            except:
+                print("\nPROGRAMM STOPPED! IT IS RECOMMENDED TO USE THE end COMMAND ON THE END OF THE PROGRAMM!")
+                sys.exit(-1)
             if bl[0][0] == name:
                 bl=[["__main__",""]]
 
@@ -403,84 +407,6 @@ def decodeblock(name, _bl):
                         sys.exit(-1)
                     storeb(com[1], None,bl)
 
-                case "add":                                          # do simple math stuff (add)                                                                                   add [in1] [in2] [out]
-                    if not len(com)-1 == 3:
-                        print("ERROR: missing arguments / too much arguments!",bl)
-                        sys.exit(-1)
-                    i1 = parsearg(com[1],bl)
-                    i2 = parsearg(com[2],bl)
-
-                    o = i1 + i2
-
-                    storeb(com[3], o,bl)
-                
-                case "sub":                                          # do simple math stuff (sub)                                                                                   sub [in1] [in2] [out]
-                    if not len(com)-1 == 3:
-                        print("ERROR: missing arguments / too much arguments!",bl)
-                        sys.exit(-1)
-                    i1 = parsearg(com[1],bl)
-                    i2 = parsearg(com[2],bl)
-                    o = i1 - i2
-
-                    storeb(com[3], o,bl)
-
-                case "mul":                                          # do simple math stuff (mul)                                                                                   mul [in1] [in2] [out]
-                    if not len(com)-1 == 3:
-                        print("ERROR: missing arguments / too much arguments!",bl)
-                        sys.exit(-1)
-                    i1 = parsearg(com[1],bl)
-                    i2 = parsearg(com[2],bl)
-                    o = i1 * i2
-
-                    storeb(com[3], o,bl)
-
-                case "div":                                          # do simple math stuff (div)                                                                                   div [in1] [in2] [out]
-                    if not len(com)-1 == 3:
-                        print("ERROR: missing arguments / too much arguments!",bl)
-                        sys.exit(-1)
-                    i1 = parsearg(com[1],bl)
-                    i2 = parsearg(com[2],bl)
-                    o = i1 / i2
-
-                    storeb(com[3], o,bl)
-                    
-                case "mod":                                          # do simple math stuff (mod)                                                                                   mod [in1] [in2] [out]
-                    if not len(com)-1 == 3:
-                        print("ERROR: missing arguments / too much arguments!",bl)
-                        sys.exit(-1)
-                    i1 = parsearg(com[1],bl)
-                    i2 = parsearg(com[2],bl)
-                    o = i1 % i2
-
-                    storeb(com[3], o,bl)
-                    
-                case "sin":                                          # do simple math stuff (sin)                                                                                   sin [in1] [out]
-                    if not len(com)-1 == 2:
-                        print("ERROR: missing arguments / too much arguments!",bl)
-                        sys.exit(-1)
-                    i1 = parsearg(com[1],bl)
-                    o = math.sin(i1)
-
-                    storeb(com[2], o,bl)
-                    
-                case "cos":                                          # do simple math stuff (cos)                                                                                   cos [in1] [out]
-                    if not len(com)-1 == 2:
-                        print("ERROR: missing arguments / too much arguments!",bl)
-                        sys.exit(-1)
-                    i1 = parsearg(com[1],bl)
-                    o = math.cos(i1)
-
-                    storeb(com[2], o,bl)
-                    
-                case "tan":                                          # do simple math stuff (tan)                                                                                   tan [in1] [out]
-                    if not len(com)-1 == 2:
-                        print("ERROR: missing arguments / too much arguments!",bl)
-                        sys.exit(-1)
-                    i1 = parsearg(com[1],bl)
-                    o = math.tan(i1)
-
-                    storeb(com[2], o,bl)
-
                 case "st":                                           # set type of variable                                                                                         st [out] [type]
                     if not len(com)-1 == 2:
                         print("ERROR: missing arguments / too much arguments!",bl)
@@ -564,12 +490,11 @@ time_run_start = time.time()
 if __name__ == "__main__":
     decodeblock("__main__",[["__main__",""]])
 
-time_run_end = time.time()
-time_total_end = time.time()
+    time_run_end = time.time()
+    time_total_end = time.time()
 
-import os, psutil; used_mem = psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2 * 1.049
+    import os, psutil; used_mem = psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2 * 1.049
 
-if __name__ == "__main__":
     print("\nProgramm Finished!\n")
     print("dev data:")
     print("runtime: PYTHON-3-STANDARD-INTERPRETER")

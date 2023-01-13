@@ -9,6 +9,7 @@ import storage
 
 
 def command(args, optargs, bl):
+    o = 0
     for i in optargs:
-        o += i
+        o += main.parsearg(i, bl)
     main.storeb(args[0], o, bl)

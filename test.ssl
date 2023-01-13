@@ -17,7 +17,7 @@
 #log vtmp0
 #ret
 
-var vout i0
+var out i0
 
 add i10 i10 vout
 log sADD

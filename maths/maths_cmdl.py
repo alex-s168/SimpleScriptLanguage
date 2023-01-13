@@ -23,6 +23,7 @@ from maths import cmd_ceil
 from maths import cmd_fact
 from maths import cmd_lim
 from maths import cmd_sum
+from maths import cmd_abs
 
 cmdl = []
 cmdl.append(main.command("add", 3, 0, cmd_add.command))
