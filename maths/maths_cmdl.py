@@ -39,6 +39,7 @@ cmdl.append(main.command("ceil", 2, 0, cmd_ceil.command))
 cmdl.append(main.command("fact", 2, 0, cmd_fact.command))
 cmdl.append(main.command("lim", 3, 0, cmd_lim.command))
 cmdl.append(main.command("sum", 1, -1, cmd_sum.command))
+cmdl.append(main.command("abs", 2, 0, cmd_abs.command))
 
 def cmd(com: str, args: list, bl: list):
     for i in cmdl:
