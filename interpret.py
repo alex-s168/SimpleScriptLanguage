@@ -2,55 +2,56 @@ import time
 import sys
 import math
 
+import basic.basic_cmdl as basic_cmdl
+import arrays.arrays_cmdl as array_cmdl
+import blocks.blocks_cmdl as blocks_cmdl
+import maths.maths_cmdl as math_cmdl
+import strings.strings_cmdl as strings_cmdl
+import utils.utils_cmdl as utils_cmdl
+
+import storage
+
 time_total_start = time.time()
 
-blocknames = []
-blocks = []
-varlist = []
-varlistv = []
-vartemp = None
-subroutine_params = []
-total_delay = 0
-total_cinput_delay = 0
+for i in range(storage.tempvaramount):
+    storage.varlist.append("tmp"+str(i))
+    storage.varlistv.append(None)
 
-imported_blocks = []
-
-tempvaramount = 0
-file = "test.ssl"
-
-for i in range(tempvaramount):
-    varlist.append("tmp"+str(i))
-    varlistv.append(None)
-
+def errorprinter(error, bl):
+    print("ERROR: "+error)
+    print(bl[0])
+    print("Stacktrace:")
+    for i in bl[1]:
+        print(i)
 
 def store(where, val,bl):
     if where == "vtemp":
         vartemp = parsearg(val,bl)
     elif where[0] == "v":
-        if where[1:] in varlist:
-            varlistv[varlist.index(where[1:])] = parsearg(val,bl)
+        if where[1:] in storage.varlist:
+            storage.varlistv[storage.varlist.index(where[1:])] = parsearg(val,bl)
         else:
-            print("ERROR: Variable " + where[1:] + " needs to be declared before it can be used!",bl)
+            errorprinter("Variable " + where[1:] + " needs to be declared before it can be used!",bl)
             sys.exit(-1)
     elif where == "_pass":
         pass
     else:
-        print("ERROR: No storage named ",where , "!",bl)
+        errorprinter("No storage named "+where+"!",bl)
         sys.exit(-1)
 
 def storeb(where, val,bl):
     if where == "vtemp":
         vartemp = val
     elif where[0] == "v":
-        if where[1:] in varlist:
-            varlistv[varlist.index(where[1:])] = val
+        if where[1:] in storage.varlist:
+            storage.varlistv[storage.varlist.index(where[1:])] = val
         else:
-            print("ERROR: Variable " + where[1:] + " needs to be declared before it can be used!",bl)
+            errorprinter("Variable " + where[1:] + " needs to be declared before it can be used!",bl)
             sys.exit(-1)
     elif where == "_pass":
         pass
     else:
-        print("ERROR: No storage named ",where , "!",bl)
+        errorprinter("No storage named ",where , "!",bl)
         sys.exit(-1)
 
 def arrize(r,bl):
@@ -77,12 +78,12 @@ def parsearg(arg,bl):
     if arg == "_space":
         return " "
     if arg == "vtemp":
-        return vartemp
+        return storage.vartemp
     if b == "v":
-        if r in varlist:
-            return varlistv[varlist.index(r)]
+        if r in storage.varlist:
+            return storage.varlistv[storage.varlist.index(r)]
         else:
-            print("ERROR: Variable " + r + " not declared!",bl)
+            errorprinter("Variable " + r + " not declared!",bl)
             sys.exit(-1)
     if b == "s":
         return str(r)
@@ -94,7 +95,7 @@ def parsearg(arg,bl):
         return bool(r)
     if b == "a":
         return arrize(r)
-    print("ERROR: Datatype " + b + " does not exist!",bl)
+    errorprinter("Datatype " + b + " does not exist!",bl)
     sys.exit(-1)
 
 def getindexname(arr2, search):
@@ -106,6 +107,21 @@ def getindexname(arr2, search):
             break
         x += 1
     return o
+
+class command:
+    def __init__(self, _name: str, _args: int, _optargs: int, _func):
+        self.name = _name
+        self.args = _args
+        self.optargs = _optargs
+        self.func = _func
+
+    def call(self, bl: str, arglist: list):
+        if len(arglist) < self.args:
+            errorprinter("missing arguments!", bl)
+        if len(arglist) > self.optargs + self.args:
+            errorprinter("too much arguments arguments!", bl)
+        
+        self.func(arglist[:self.args], arglist[self.optargs:], bl)
 
 def blockconvert(file):
     bl = []
@@ -132,11 +148,12 @@ def blockconvert(file):
 
     return [bl, bn]
 
-time_dec_start = time.time()
-t = blockconvert(file)
-blocks = t[0]
-blocknames = t[1]
-time_dec_end = time.time()
+if __name__ == "__main__":
+    time_dec_start = time.time()
+    t = blockconvert(storage.file)
+    blocks = t[0]
+    blocknames = t[1]
+    time_dec_end = time.time()
 
 def insext(list: list, list2: list, pos: int):
     l = list
@@ -178,12 +195,34 @@ def decodeblock(name):
             pass
         else:
             com = getblock(name)[line]
-            bl = "File: "+file+" Block: "+str(name)+" Line: "+str(line+1)+" Command: "+com[0].rstrip()
+            bl = "File: "+storage.file+" Block: "+str(name)+" Line: "+str(line+1)+" Command: "+com[0].rstrip()
 
             x = 0
             for i in com:
                 com[x] = i.rstrip()
                 x += 1
+
+            e = False
+            if basic_cmdl.cmd(com[0], com[1:], bl):
+                e = True
+            if blocks_cmdl.cmd(com[0], com[1:], bl):
+                e = True
+            if array_cmdl.cmd(com[0], com[1:], bl):
+                e = True
+            if strings_cmdl.cmd(com[0], com[1:], bl):
+                e = True
+            if math_cmdl.cmd(com[0], com[1:], bl):
+                e = True
+            if utils_cmdl.cmd(com[0], com[1:], bl):
+                e = True
+            
+                
+            # Uncomment later
+            #if e == False:
+            #   errorprinter("Command not found!", bl)
+
+
+
 
             match com[0]:
 
@@ -197,18 +236,6 @@ def decodeblock(name):
 
                     blocks.extend(bc[0])
                     blocknames.extend(bc[1])
-
-                case "var":                                         # creates a variable                                                                                            var [name] ?[value]
-                    if len(com)-1 > 2 or len(com)-1 < 1:
-                        print("ERROR: missing arguments / too much arguments!",bl)
-                        sys.exit(-1)
-                    varlist.append(com[1])
-                    varlistv.append("")
-                    try:
-                        if any(c.isalpha() for c in com[2]):
-                            store("v"+com[1], com[2], bl)
-                    except:
-                        pass
 
                 case "sto":                                         # stores something                                                                                              sto [what] [where]
                     if not len(com)-1 == 2:
@@ -549,15 +576,15 @@ def decodeblock(name):
                                 print("ERROR: Type ",com[2], " not found!",bl)
                                 sys.exit(-1)
                         for i in range(parsearg(com[1],bl )):
-                            varlist.append("tmp"+str(i+tempvaramount))
-                            varlistv.append(None)
-                            storeb("vtmp"+str(i+tempvaramount), o,bl)
-                        tempvaramount += parsearg(com[1],bl)
+                            storage.varlist.append("tmp"+str(i+storage.tempvaramount))
+                            storage.varlistv.append(None)
+                            storeb("vtmp"+str(i+storage.tempvaramount), o,bl)
+                        storage.tempvaramount += parsearg(com[1],bl)
                             
                     else:
                         for i in range(parsearg(com[1],bl)):
-                            varlist.append("tmp"+str(i+tempvaramount))
-                            varlistv.append(None)
+                            storage.varlist.append("tmp"+str(i+storage.tempvaramount))
+                            storage.varlistv.append(None)
                         
                 case "repl":                                           # replaces a element (string) in a string                                                                    repl [what] [with] [string] [out]
                     if not len(com)-1 == 4:
@@ -620,38 +647,40 @@ def decodeblock(name):
                     total_cinput_delay += time.time() - x
 
                 case _:
-                    if any(c.isalpha() for c in com[0]):
-                        print("ERROR: command not found!",bl)
-                        sys.exit(-1)
+                    pass
+                    #outdated
+                    #if any(c.isalpha() for c in com[0]):
+                    #    print("ERROR: command not found!",bl)
+                    #    sys.exit(-1)
 
             line += 1
 
 time_run_start = time.time()
 
-print(blocknames)
-
-decodeblock("__main__")
+if __name__ == "__main__":
+    decodeblock("__main__")
 
 time_run_end = time.time()
 time_total_end = time.time()
 
 import os, psutil; used_mem = psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2 * 1.049
 
-print("\nProgramm Finished!\n")
-print("dev data:")
-print("runtime: PYTHON-3-STANDARD-INTERPRETER")
-print("version: alpha.0.10 (12.01.2023)")
-print("total variables: ",len(varlist))
-print("- user variables: ",len(varlist)-tempvaramount)
-print("- temp variables: ",tempvaramount)
-print("total blocks: ",len(blocks)+len(imported_blocks))
-print("- local blocks: ",len(blocks))
-print("- imported blocks: ",len(imported_blocks))
-print("total time: ",(time_total_end-time_total_start)* 1000," ms")
-print("- decode time: ",(time_dec_end-time_dec_start)* 1000," ms")
-print("- run time: ",(time_run_end-time_run_start)* 1000," ms")
-print("- - run time (no delay): ",(time_run_end-time_run_start-total_delay)* 1000," ms (might be unaccurate when delay is used)")
-print("- - run time (no delay + no cinput): ",(time_run_end-time_run_start-total_delay-total_cinput_delay)* 1000," ms (might be unaccurate when cinput or delay is used)")
-print("used memory: ",used_mem," MB")
-print("- runtime: ",14," MB (inaccurate)")
-print("- interpreter: ",used_mem-14," MB (inaccurate)")
+if __name__ == "__main__":
+    print("\nProgramm Finished!\n")
+    print("dev data:")
+    print("runtime: PYTHON-3-STANDARD-INTERPRETER")
+    print("version: alpha.0.10 (12.01.2023)")
+    print("total variables: ",len(storage.varlist))
+    print("- user variables: ",len(storage.varlist)-storage.tempvaramount)
+    print("- temp variables: ",storage.tempvaramount)
+    print("total blocks: ",len(blocks)+len(storage.imported_blocks))
+    print("- local blocks: ",len(blocks))
+    print("- imported blocks: ",len(storage.imported_blocks))
+    print("total time: ",(time_total_end-time_total_start)* 1000," ms")
+    print("- decode time: ",(time_dec_end-time_dec_start)* 1000," ms")
+    print("- run time: ",(time_run_end-time_run_start)* 1000," ms")
+    print("- - run time (no delay): ",(time_run_end-time_run_start-storage.total_delay)* 1000," ms (might be unaccurate when delay is used)")
+    print("- - run time (no delay + no cinput): ",(time_run_end-time_run_start-storage.total_delay-storage.total_cinput_delay)* 1000," ms (might be unaccurate when cinput or delay is used)")
+    print("used memory: ",used_mem," MB")
+    print("- runtime: ",14," MB (inaccurate)")
+    print("- interpreter: ",used_mem-14," MB (inaccurate)")
