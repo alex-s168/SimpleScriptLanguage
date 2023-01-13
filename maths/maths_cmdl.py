@@ -24,6 +24,11 @@ from maths import cmd_fact
 from maths import cmd_lim
 from maths import cmd_sum
 from maths import cmd_abs
+from maths import cmd_sqrt
+from maths import cmd_root
+from maths import cmd_exp
+from maths import cmd_loc
+from maths import cmd_sign
 
 cmdl = []
 cmdl.append(main.command("add", 3, 0, cmd_add.command))
@@ -41,6 +46,11 @@ cmdl.append(main.command("fact", 2, 0, cmd_fact.command))
 cmdl.append(main.command("lim", 3, 0, cmd_lim.command))
 cmdl.append(main.command("sum", 1, -1, cmd_sum.command))
 cmdl.append(main.command("abs", 2, 0, cmd_abs.command))
+cmdl.append(main.command("sqrt", 2, 0, cmd_sqrt.command))
+cmdl.append(main.command("root", 3, 0, cmd_root.command))
+cmdl.append(main.command("exp", 3, 0, cmd_exp.command))
+cmdl.append(main.command("loc", 3, 0, cmd_loc.command))
+cmdl.append(main.command("sign", 3, 0, cmd_sign.command))
 
 def cmd(com: str, args: list, bl: list):
     for i in cmdl:
