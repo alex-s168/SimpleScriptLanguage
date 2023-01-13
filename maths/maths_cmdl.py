@@ -19,7 +19,7 @@ from maths import cmd_cos
 from maths import cmd_tan
 from maths import cmd_round
 from maths import cmd_floor
-from maths import cmd_cell
+from maths import cmd_ceil
 from maths import cmd_fact
 
 cmdl = []
@@ -33,7 +33,7 @@ cmdl.append(main.command("cos", 2, 0, cmd_cos.command))
 cmdl.append(main.command("tan", 2, 0, cmd_tan.command))
 cmdl.append(main.command("round", 2, 0, cmd_round.command))
 cmdl.append(main.command("floor", 2, 0, cmd_floor.command))
-cmdl.append(main.command("cell", 2, 0, cmd_ceel.command))
+cmdl.append(main.command("ceil", 2, 0, cmd_ceil.command))
 cmdl.append(main.command("fact", 2, 0, cmd_fact.command))
 
 def cmd(com: str, args: list, bl: list):
