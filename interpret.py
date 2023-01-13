@@ -147,8 +147,8 @@ def blockconvert(file):
 if __name__ == "__main__":
     time_dec_start = time.time()
     t = blockconvert(storage.file)
-    blocks = t[0]
-    blocknames = t[1]
+    storage.blocks = t[0]
+    storage.blocknames = t[1]
     time_dec_end = time.time()
 
 def insext(list: list, list2: list, pos: int):
@@ -162,11 +162,8 @@ def insext(list: list, list2: list, pos: int):
     return l
 
 def getblock(name):
-    global blocknames
-    global blocks
-
     try:
-        return blocks[getindexname(blocknames, str(name))]
+        return storage.blocks[getindexname(storage.blocknames, str(name))]
     except:
         print("ERROR: Block",name, "not found!")
         sys.exit(-1)
@@ -642,7 +639,7 @@ def decodeblock(name, _bl):
                     #    print("ERROR: command not found!",bl)
                     #    sys.exit(-1)
 
-            line += 1
+            line += 1 
 
 time_run_start = time.time()
 
@@ -662,8 +659,8 @@ if __name__ == "__main__":
     print("total variables: ",len(storage.varlist))
     print("- user variables: ",len(storage.varlist)-storage.tempvaramount)
     print("- temp variables: ",storage.tempvaramount)
-    print("total blocks: ",len(blocks)+len(storage.imported_blocks))
-    print("- local blocks: ",len(blocks))
+    print("total blocks: ",len(storage.blocks)+len(storage.imported_blocks))
+    print("- local blocks: ",len(storage.blocks))
     print("- imported blocks: ",len(storage.imported_blocks))
     print("total time: ",(time_total_end-time_total_start)* 1000," ms")
     print("- decode time: ",(time_dec_end-time_dec_start)* 1000," ms")

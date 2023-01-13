@@ -13,7 +13,5 @@ def command(args, optargs, bl):
 
     bc = main.blockconvert(a_filename)
 
-    print(bc)
-
     storage.blocks.extend(bc[0])
     storage.blocknames.extend(bc[1])
