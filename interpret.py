@@ -231,17 +231,6 @@ def decodeblock(name, _bl):
                         decodeblock(com[2],bl)
                         c += 1
 
-                case "loop":                                        # loops X times. calls a subroutine with one arg: [iteration]                                                   loop [amount] [block]
-                    if not len(com)-1 == 2:
-                        print("ERROR: missing arguments / too much arguments!",bl)
-                        sys.exit(-1)
-                    l = parsearg(com[1],bl)
-                    c = 0
-                    for i in range(l):
-                        storage.subroutine_params = [c]
-                        decodeblock(com[2],bl)
-                        c += 1
-
                 case "scmb":                                        # Combines multiple strings                                                                                     scmb [out] [in1: s] [in2: s] ?[in3: s] ....
                     if not len(com)-1 <= 3:
                         print("ERROR: missing arguments / too much arguments!",bl)
@@ -254,30 +243,6 @@ def decodeblock(name, _bl):
                             print("ERROR: Can only combine strings!",bl)
                             sys.exit(-1)
                     storeb(com[1], s,bl)
-
-                case "conv":                                        # Converts a value                                                                                              conv [in] [type] [out]
-                    if not len(com)-1 == 3:
-                        print("ERROR: missing arguments / too much arguments!",bl)
-                        sys.exit(-1)
-                    i = parsearg(com[1],bl)
-                    o = None
-
-                    match com[2]:
-                        case "s":
-                            o = str(i)
-                        case "i":
-                            o = int(i)
-                        case "b":
-                            o = bool(i)
-                        case "a":
-                            o = arrizeb(i,bl)
-                        case "f":
-                            o = float(i)
-                        case _:
-                            print("ERROR: Type ",com[2], " not found!",bl)
-                            sys.exit(-1)
-                    
-                    storeb(com[3], o,bl)
 
                 case "aapp":                                         # Appends a value to a array                                                                                   aap [in] [element] [out]
                     if not len(com)-1 == 3:
@@ -358,32 +323,6 @@ def decodeblock(name, _bl):
                     nl = i1.split(i2) 
 
                     storeb(com[3], nl,bl)
-                case "clv":                                          # Clears a value (sets to none)                                                                                clv [out]
-                    if not len(com)-1 == 1:
-                        print("ERROR: missing arguments / too much arguments!",bl)
-                        sys.exit(-1)
-                    storeb(com[1], None,bl)
-
-                case "st":                                           # set type of variable                                                                                         st [out] [type]
-                    if not len(com)-1 == 2:
-                        print("ERROR: missing arguments / too much arguments!",bl)
-                        sys.exit(-1)
-                    o = None
-                    match com[2]:
-                        case "s":
-                            o = ""
-                        case "i":
-                            o = 0
-                        case "b":
-                            o = False
-                        case "a":
-                            o = []
-                        case "f":
-                            o = 0.0
-                        case _:
-                            print("ERROR: Type ",com[2], " not found!",bl)
-                            sys.exit(-1)
-                    storeb(com[1], o,bl)
                         
                 case "repl":                                           # replaces a element (string) in a string                                                                    repl [what] [with] [string] [out]
                     if not len(com)-1 == 4:

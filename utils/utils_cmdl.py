@@ -9,10 +9,17 @@ import storage
 
 # import commands
 
-from basic import cmd_var
+from utils import cmd_loop
+from utils import cmd_conv
+from utils import cmd_clv
+from utils import cmd_st
 
 cmdl = []
 
+cmdl.append(main.command("loop", 2, 0, cmd_loop.command))
+cmdl.append(main.command("conv", 3, 0, cmd_conv.command))
+cmdl.append(main.command("clv", 1, 0, cmd_clv.command))
+cmdl.append(main.command("st", 2, 0, cmd_st.command))
 
 
 def cmd(com: str, args: list, bl: list):
