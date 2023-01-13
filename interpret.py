@@ -34,12 +34,10 @@ def store(where, val,bl):
             storage.varlistv[storage.varlist.index(where[1:])] = parsearg(val,bl)
         else:
             errorprinter("Variable " + where[1:] + " needs to be declared before it can be used!",bl)
-            sys.exit(-1)
     elif where == "_pass":
         pass
     else:
         errorprinter("No storage named "+where+"!",bl)
-        sys.exit(-1)
 
 def storeb(where, val,bl):
     if where == "vtemp":
@@ -74,6 +72,11 @@ def parsearg(arg,bl):
 
     if arg == "_space":
         return " "
+    if arg == "_pi":
+        return math.pi
+    if arg == "_e":
+        return math.exp(1)
+    
     if arg == "vtemp":
         return storage.vartemp
     if b == "v":
@@ -117,7 +120,10 @@ class command:
         if (len(arglist) > self.optargs + self.args) and not self.optargs == -1:
             errorprinter("too much arguments arguments!", bl)
         
-        self.func(arglist[:self.args], arglist[self.optargs:], bl)
+        if self.optargs == -1:
+            self.func(arglist[:self.args], arglist[self.args:], bl)
+        else:
+            self.func(arglist[:self.args], arglist[self.optargs:], bl)
 
 def blockconvert(file):
     bl = []
@@ -213,55 +219,6 @@ def decodeblock(name, _bl):
 
 
             match com[0]:
-
-                case "jmp":                                         # jumps to a code block and ends decoding of this block                                                         jmp [block]
-                    if not len(com)-1 == 1:
-                        print("ERROR: missing arguments / too much arguments!",bl)
-                        sys.exit(-1)
-                    contdec = False
-                    decodeblock(com[1], bl)
-                
-                case "jsr":                                         # jumps to a codeblock but continues decoding after the codeblock is finished and stores the ret value          jsr [block] ?[out]
-                    if not len(com)-1 <= 1:
-                        print("ERROR: missing arguments / too much arguments!",bl)
-                        sys.exit(-1)
-                    t = decodeblock(com[1],bl)
-                    try:
-                        if any(c.isalpha() for c in com[2]):
-                            store(com[2], t,bl)
-                    except: pass
-                    else:
-                        store("vtemp", t,bl)
-                
-                case "jvsr":                                        # like jsr but also sends args to subroutine                                                                    jvsr [block] [out] [val1] ?[val2] ?[val3] ....
-                    if not len(com)-1 <= 3:
-                        print("ERROR: missing arguments / too much arguments!",bl)
-                        sys.exit(-1)
-                    t = decodeblock(com[1])
-                    store(com[2], t,bl)
-                    subroutine_params = []
-                    for i in com[2:]:
-                        if any(c.isalpha() for c in com[2]):
-                            subroutine_params.append(parsearg(i,bl))
-                case "ret":                                         # returns a value when block is called from subroutine (to the subroutine command) also stops exec of block     ret ?[val]
-                    if len(com)-1 > 1:
-                        print("ERROR: too much arguments!",bl)
-                        sys.exit(-1)
-                    contdec = False
-                    try:
-                        if any(c.isalpha() for c in com[1]):
-                            return com[1]
-                    except:pass
-                    return
-
-                case "grv":                                         # gets subroutine values (when subroutine is called via a value-subroutine command)                             grv [out1] ?[out2] ?[out3] ?[out4] ....
-                    c = 0
-                    for i in storage.subroutine_params:
-                        try:
-                            storeb(com[1+c], i,bl)
-                        except: pass
-                        c += 1
-                    storage.subroutine_params = []
 
                 case "iter":                                        # iterates over a given list. calls a subroutine with two args: [id] [elem]                                     iter [arr] [block]
                     if not len(com)-1 == 2:
@@ -435,50 +392,6 @@ def decodeblock(name, _bl):
                     s = parsearg(com[3],bl)
                     o = s.replace(parsearg(com[1],bl), parsearg(com[2],bl))
                     storeb(com[4], o,bl)
-
-                case "eq":                                             # Jumps to a block if both inputs are equal                                                                  eq [block] [in1] [in2]
-                    if not len(com)-1 == 3:
-                        print("ERROR: missing arguments / too much arguments!",bl)
-                        sys.exit(-1)
-                    if parsearg(com[2],bl) == parsearg(com[3],bl):
-                        contdec = False
-                        decodeblock(com[1])
-
-                case "neq":                                            # Jumps to a block if both inputs are not equal                                                              neq [block] [in1] [in2]
-                    if not len(com)-1 == 3:
-                        print("ERROR: missing arguments / too much arguments!",bl)
-                        sys.exit(-1)
-                    if not parsearg(com[2],bl) == parsearg(com[3],bl):
-                        contdec = False
-                        decodeblock(com[1])
-                
-                case "seq":                                             # Jumps to a subroutine if both inputs are equal                                                            seq [block] [in1] [in2] ?[out]
-                    if not len(com)-1 <= 3:
-                        print("ERROR: missing arguments / too much arguments!",bl)
-                        sys.exit(-1)
-                    if parsearg(com[2],bl) == parsearg(com[3],bl):
-                        t = decodeblock(com[1])
-                        try:
-                            if any(c.isalpha() for c in com[4]):
-                                store(com[4], t,bl)
-                            else:
-                                store("vtemp", t,bl)
-                        except:
-                            store("vtemp", t,bl)
-
-                case "sneq":                                            # Jumps to a subroutine if both inputs are not equal                                                        sneq [block] [in1] [in2] ?[out]
-                    if not len(com)-1 <= 3:
-                        print("ERROR: missing arguments / too much arguments!",bl)
-                        sys.exit(-1)
-                    if not parsearg(com[2],bl) == parsearg(com[3],bl):
-                        t = decodeblock(com[1])
-                        try:
-                            if any(c.isalpha() for c in com[4]):
-                                store(com[4], t,bl)
-                            else:
-                                store("vtemp", t,bl)
-                        except:
-                            store("vtemp", t,bl)
 
                 case _:
                     pass
