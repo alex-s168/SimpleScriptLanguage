@@ -10,10 +10,12 @@ import storage
 # import commands
 
 from basic import cmd_var
+from basic import cmd_lcfb
 
 cmdl = []
 
 cmdl.append(main.command("var", 1, 1, cmd_var.command))
+cmdl.append(main.command("lcfb", 1, 1, cmd_lcfb.command))
 
 def cmd(com: str, args: list, bl: list):
     for i in cmdl:

@@ -18,11 +18,10 @@ for i in range(storage.tempvaramount):
     storage.varlistv.append(None)
 
 def errorprinter(error, bl):
-    print("ERROR: "+error)
-    print(bl[0])
+    print("\nERROR: "+error)
     print("Stacktrace:")
-    for i in bl[1]:
-        print(i)
+    for i in bl[1:]:
+        print("Block:",i[0],i[1])
 
 def store(where, val,bl):
     if where == "vtemp":
@@ -69,9 +68,6 @@ def arrizeb(r,bl):
     return n
 
 def parsearg(arg,bl):
-    global varlist
-    global varlistv
-
     b = arg[0]
     r = arg[1:]
 
@@ -175,28 +171,21 @@ def getblock(name):
         print("ERROR: Block",name, "not found!")
         sys.exit(-1)
 
-def decodeblock(name):
-    global total_cinput_delay
-    global subroutine_params
-    global varlist
-    global varlistv
-    global total_delay
-    global tempvaramount
-    global blocks
-    global imported_blocks
-    global blocknames
+def decodeblock(name, _bl):
+    bl = _bl
 
     contdec = True
     line = 0
 
     while contdec:
-        # todo!
         if False:
             pass
         else:
             com = getblock(name)[line]
-            bl = "File: "+storage.file+" Block: "+str(name)+" Line: "+str(line+1)+" Command: "+com[0].rstrip()
+            if bl[0][0] == name:
+                bl=[["__main__",""]]
 
+            bl.append([str(name), "File: "+storage.file+"  Line: "+str(line+1)+" Command: "+com[0].rstrip()])
             x = 0
             for i in com:
                 com[x] = i.rstrip()
@@ -226,16 +215,16 @@ def decodeblock(name):
 
             match com[0]:
 
-                case "lcfb":                                        # load code file blocks                                                                                         lcfb [filename]
-                    if len(com)-1 > 1 or len(com)-1 < 1:
-                        print("ERROR: missing arguments / too much arguments!",bl)
-                        sys.exit(-1)
-                    a_filename = str(com[1])
-
-                    bc = blockconvert(a_filename)
-
-                    blocks.extend(bc[0])
-                    blocknames.extend(bc[1])
+                #case "lcfb":                                        # load code file blocks                                                                                         lcfb [filename]
+                #    if len(com)-1 > 1 or len(com)-1 < 1:
+                #        print("ERROR: missing arguments / too much arguments!",bl)
+                #        sys.exit(-1)
+                #    a_filename = str(com[1])
+#
+                #    bc = blockconvert(a_filename)
+#
+                #    blocks.extend(bc[0])
+                #    blocknames.extend(bc[1])
 
                 case "sto":                                         # stores something                                                                                              sto [what] [where]
                     if not len(com)-1 == 2:
@@ -261,13 +250,13 @@ def decodeblock(name):
                         print("ERROR: missing arguments / too much arguments!",bl)
                         sys.exit(-1)
                     contdec = False
-                    decodeblock(com[1])
+                    decodeblock(com[1], bl)
                 
                 case "jsr":                                         # jumps to a codeblock but continues decoding after the codeblock is finished and stores the ret value          jsr [block] ?[out]
                     if not len(com)-1 <= 1:
                         print("ERROR: missing arguments / too much arguments!",bl)
                         sys.exit(-1)
-                    t = decodeblock(com[1])
+                    t = decodeblock(com[1],bl)
                     try:
                         if any(c.isalpha() for c in com[2]):
                             store(com[2], t,bl)
@@ -298,12 +287,12 @@ def decodeblock(name):
 
                 case "grv":                                         # gets subroutine values (when subroutine is called via a value-subroutine command)                             grv [out1] ?[out2] ?[out3] ?[out4] ....
                     c = 0
-                    for i in subroutine_params:
+                    for i in storage.subroutine_params:
                         try:
                             storeb(com[1+c], i,bl)
                         except: pass
                         c += 1
-                    subroutine_params = []
+                    storage.subroutine_params = []
 
                 case "iter":                                        # iterates over a given list. calls a subroutine with two args: [id] [elem]                                     iter [arr] [block]
                     if not len(com)-1 == 2:
@@ -312,8 +301,8 @@ def decodeblock(name):
                     l = parsearg(com[1],bl)
                     c = 0
                     for i in l:
-                        subroutine_params = [c, i]
-                        decodeblock(com[2])
+                        storage.subroutine_params = [c, i]
+                        decodeblock(com[2],bl)
                         c += 1
 
                 case "loop":                                        # loops X times. calls a subroutine with one arg: [iteration]                                                   loop [amount] [block]
@@ -323,8 +312,8 @@ def decodeblock(name):
                     l = parsearg(com[1],bl)
                     c = 0
                     for i in range(l):
-                        subroutine_params = [c]
-                        decodeblock(com[2])
+                        storage.subroutine_params = [c]
+                        decodeblock(com[2],bl)
                         c += 1
 
                 case "scmb":                                        # Combines multiple strings                                                                                     scmb [out] [in1: s] [in2: s] ?[in3: s] ....
@@ -334,7 +323,7 @@ def decodeblock(name):
                     s = ""
                     for i in com[2:]:
                         try:
-                            s = s + parsearg(i)
+                            s = s + parsearg(i,bl)
                         except:
                             print("ERROR: Can only combine strings!",bl)
                             sys.exit(-1)
@@ -658,7 +647,7 @@ def decodeblock(name):
 time_run_start = time.time()
 
 if __name__ == "__main__":
-    decodeblock("__main__")
+    decodeblock("__main__",[["__main__",""]])
 
 time_run_end = time.time()
 time_total_end = time.time()
