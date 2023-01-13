@@ -6,11 +6,11 @@ sys.path.append(parent)
 import interpret as main
 import storage
 
-from math import cell
+from math import ceil
 
 
 
 def command(args, optargs, bl):
     i1 = main.parsearg(args[0], bl)
-    o = cell(i1)
+    o = ceil(i1)
     main.storeb(args[1], o, bl)
