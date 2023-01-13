@@ -7,7 +7,7 @@ sarrify vtest vtest
 log vtest
 iter vtest loop
 
-lcfb test2.ssl
+lcfb stest2.ssl
 jsr funztalles
 
 end
