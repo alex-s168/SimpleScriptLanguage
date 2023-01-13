@@ -21,6 +21,8 @@ from maths import cmd_round
 from maths import cmd_floor
 from maths import cmd_ceil
 from maths import cmd_fact
+from maths import cmd_lim
+from maths import cmd_sum
 
 cmdl = []
 cmdl.append(main.command("add", 3, 0, cmd_add.command))
@@ -35,6 +37,8 @@ cmdl.append(main.command("round", 2, 0, cmd_round.command))
 cmdl.append(main.command("floor", 2, 0, cmd_floor.command))
 cmdl.append(main.command("ceil", 2, 0, cmd_ceil.command))
 cmdl.append(main.command("fact", 2, 0, cmd_fact.command))
+cmdl.append(main.command("lim", 3, 0, cmd_lim.command))
+cmdl.append(main.command("sum", 1, -1, cmd_sum.command))
 
 def cmd(com: str, args: list, bl: list):
     for i in cmdl:
