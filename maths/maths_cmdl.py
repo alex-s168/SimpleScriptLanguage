@@ -9,11 +9,32 @@ import storage
 
 # import commands
 
-from basic import cmd_var
+from maths import cmd_add
+from maths import cmd_sub
+from maths import cmd_mul
+from maths import cmd_div
+from maths import cmd_mod
+from maths import cmd_sin
+from maths import cmd_cos
+from maths import cmd_tan
+from maths import cmd_round
+from maths import cmd_floor
+from maths import cmd_cell
+from maths import cmd_fact
 
 cmdl = []
-
-
+cmdl.append(main.command("add", 3, 0, cmd_add.command))
+cmdl.append(main.command("sub", 3, 0, cmd_sub.command))
+cmdl.append(main.command("mul", 3, 0, cmd_mul.command))
+cmdl.append(main.command("div", 3, 0, cmd_div.command))
+cmdl.append(main.command("mod", 3, 0, cmd_mod.command))
+cmdl.append(main.command("sin", 2, 0, cmd_sin.command))
+cmdl.append(main.command("cos", 2, 0, cmd_cos.command))
+cmdl.append(main.command("tan", 2, 0, cmd_tan.command))
+cmdl.append(main.command("round", 2, 0, cmd_round.command))
+cmdl.append(main.command("floor", 2, 0, cmd_floor.command))
+cmdl.append(main.command("cell", 2, 0, cmd_ceel.command))
+cmdl.append(main.command("fact", 2, 0, cmd_fact.command))
 
 def cmd(com: str, args: list, bl: list):
     for i in cmdl:
