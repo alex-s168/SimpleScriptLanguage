@@ -12,5 +12,5 @@ from math import round
 
 def command(args, optargs, bl):
     i1 = main.parsearg(args[0], bl)
-    o = math.round(i1)
+    o = round(i1)
     main.storeb(args[1], o, bl)

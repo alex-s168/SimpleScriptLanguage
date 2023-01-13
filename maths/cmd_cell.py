@@ -12,5 +12,5 @@ from math import cell
 
 def command(args, optargs, bl):
     i1 = main.parsearg(args[0], bl)
-    o = math.cell(i1)
+    o = cell(i1)
     main.storeb(args[1], o, bl)

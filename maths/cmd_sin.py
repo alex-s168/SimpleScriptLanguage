@@ -12,5 +12,5 @@ from math import sin
 
 def command(args, optargs, bl):
     i1 = main.parsearg(args[0], bl)
-    o = math.sin(i1)
+    o = sin(i1)
     main.storeb(args[1], o, bl)

@@ -19,5 +19,5 @@ def command(args, optargs, bl):
             int(i1)
         except:
             main.errorprinter("input is not an integer!", bl)
-    o = math.factorial(i1)
+    o = factorial(i1)
     main.storeb(args[1], o, bl)

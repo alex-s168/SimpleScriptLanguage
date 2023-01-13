@@ -12,5 +12,5 @@ from math import floor
 
 def command(args, optargs, bl):
     i1 = main.parsearg(args[0], bl)
-    o = math.floor(i1)
+    o = floor(i1)
     main.storeb(args[1], o, bl)

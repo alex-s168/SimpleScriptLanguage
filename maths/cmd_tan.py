@@ -12,5 +12,5 @@ from math import tan
 
 def command(args, optargs, bl):
     i1 = main.parsearg(args[0], bl)
-    o = math.tan(i1)
+    o = tan(i1)
     main.storeb(args[1], o, bl)

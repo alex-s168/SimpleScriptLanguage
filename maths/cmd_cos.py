@@ -12,5 +12,5 @@ from math import cos
 
 def command(args, optargs, bl):
     i1 = main.parsearg(args[0], bl)
-    o = math.cos(i1)
+    o = cos(i1)
     main.storeb(args[1], o, bl)
