@@ -6,10 +6,10 @@ sys.path.append(parent)
 import interpret as main
 import storage
 
+from math import exp
 
 
 def command(args, optargs, bl):
     i1 = main.parsearg(args[0], bl)
-    i2 = main.parsearg(args[1], bl)
-    o = i1**i2
-    main.storeb(args[2], o, bl)
+    o = exp(i1)
+    main.storeb(args[1], o, bl)
