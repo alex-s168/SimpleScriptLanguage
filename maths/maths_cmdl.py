@@ -54,7 +54,7 @@ cmdl.append(main.command("sum", 1, -1, cmd_sum.command))
 cmdl.append(main.command("abs", 2, 0, cmd_abs.command))
 cmdl.append(main.command("sqrt", 2, 0, cmd_sqrt.command))
 cmdl.append(main.command("root", 3, 0, cmd_root.command))
-cmdl.append(main.command("exp", 3, 0, cmd_exp.command))
+cmdl.append(main.command("exp", 2, 0, cmd_exp.command))
 cmdl.append(main.command("loc", 3, 0, cmd_loc.command))
 cmdl.append(main.command("sign", 3, 0, cmd_sign.command))
 
