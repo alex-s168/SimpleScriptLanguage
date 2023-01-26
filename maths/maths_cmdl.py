@@ -17,6 +17,9 @@ from maths import cmd_mod
 from maths import cmd_sin
 from maths import cmd_cos
 from maths import cmd_tan
+from maths import cmd_asin
+from maths import cmd_acos
+from maths import cmd_atan
 from maths import cmd_round
 from maths import cmd_floor
 from maths import cmd_ceil
@@ -39,6 +42,9 @@ cmdl.append(main.command("mod", 3, 0, cmd_mod.command))
 cmdl.append(main.command("sin", 2, 0, cmd_sin.command))
 cmdl.append(main.command("cos", 2, 0, cmd_cos.command))
 cmdl.append(main.command("tan", 2, 0, cmd_tan.command))
+cmdl.append(main.command("asin", 2, 0, cmd_asin.command))
+cmdl.append(main.command("acos", 2, 0, cmd_acos.command))
+cmdl.append(main.command("atan", 2, 0, cmd_atan.command))
 cmdl.append(main.command("round", 2, 0, cmd_round.command))
 cmdl.append(main.command("floor", 2, 0, cmd_floor.command))
 cmdl.append(main.command("ceil", 2, 0, cmd_ceil.command))
