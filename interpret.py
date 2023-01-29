@@ -116,14 +116,15 @@ class command:
 
     def call(self, bl: str, arglist: list):
         if len(arglist) < self.args:
-            errorprinter("missing arguments!", bl)
+            errorprinter("missing arguments! Needs: "+str(self.args)+" Provided: "+str(len(arglist)), bl)
         if (len(arglist) > self.optargs + self.args) and not self.optargs == -1:
             errorprinter("too much arguments arguments!", bl)
         
         if self.optargs == -1:
-            self.func(arglist[:self.args], arglist[self.args:], bl)
+            x = self.func(arglist[:self.args], arglist[self.args:], bl)
         else:
-            self.func(arglist[:self.args], arglist[self.optargs:], bl)
+            x = self.func(arglist[:self.args], arglist[self.optargs:], bl)
+        return x
 
 def blockconvert(file):
     bl = []
@@ -174,6 +175,35 @@ def getblock(name):
         print("ERROR: Block",name, "not found!")
         sys.exit(-1)
 
+def main_cmd_cmd(com: str, args: list, bl: list):
+    def cmd_iter(args, optargs, bl):
+        l = parsearg(args[0],bl)
+        c = 0
+        for i in l:
+            storage.subroutine_params = [c, i]
+            decodeblock(args[1],bl)
+            c += 1
+    def cmd_jmp(args, optargs, bl):
+        decodeblock(args[0], bl)
+
+    cmdl = []
+
+    cmdl.append(command("iter", 2, 0, cmd_iter))
+    cmdl.append(command("jmp", 1, 0, cmd_jmp))
+
+    for i in cmdl:
+        if com.rstrip() == i.name:
+            return [True, i.call(bl, args)]
+    return [False, None]
+
+def isnone(i):
+    try:
+        if i == None:
+            return True
+        return False
+    except:
+        return False
+
 def decodeblock(name, _bl):
     bl = _bl
 
@@ -199,18 +229,34 @@ def decodeblock(name, _bl):
                 x += 1
 
             e = False
-            if basic_cmdl.cmd(com[0], com[1:], bl):
-                e = True
-            if blocks_cmdl.cmd(com[0], com[1:], bl):
-                e = True
-            if array_cmdl.cmd(com[0], com[1:], bl):
-                e = True
-            if strings_cmdl.cmd(com[0], com[1:], bl):
-                e = True
-            if math_cmdl.cmd(com[0], com[1:], bl):
-                e = True
-            if utils_cmdl.cmd(com[0], com[1:], bl):
-                e = True
+
+            tc = basic_cmdl.cmd(com[0], com[1:], bl)
+            if not isnone(tc[1]): return x
+            if tc[0]: e = True
+
+            tc = blocks_cmdl.cmd(com[0], com[1:], bl)
+            if not isnone(tc[1]): return x
+            if tc[0]: e = True
+
+            tc = array_cmdl.cmd(com[0], com[1:], bl)
+            if not isnone(tc[1]): return x
+            if tc[0]: e = True
+
+            tc = strings_cmdl.cmd(com[0], com[1:], bl)
+            if not isnone(tc[1]): return x
+            if tc[0]: e = True
+
+            tc = math_cmdl.cmd(com[0], com[1:], bl)
+            if not isnone(tc[1]): return x
+            if tc[0]: e = True
+
+            tc = utils_cmdl.cmd(com[0], com[1:], bl)
+            if not isnone(tc[1]): return x
+            if tc[0]: e = True
+
+            tc = main_cmd_cmd(com[0], com[1:], bl)
+            if not isnone(tc[1]): return x
+            if tc[0]: e = True
             
                 
             # Uncomment later
@@ -219,17 +265,6 @@ def decodeblock(name, _bl):
 
 
             match com[0]:
-
-                case "iter":                                        # iterates over a given list. calls a subroutine with two args: [id] [elem]                                     iter [arr] [block]
-                    if not len(com)-1 == 2:
-                        print("ERROR: missing arguments / too much arguments!",bl)
-                        sys.exit(-1)
-                    l = parsearg(com[1],bl)
-                    c = 0
-                    for i in l:
-                        storage.subroutine_params = [c, i]
-                        decodeblock(com[2],bl)
-                        c += 1
 
                 case "scmb":                                        # Combines multiple strings                                                                                     scmb [out] [in1: s] [in2: s] ?[in3: s] ....
                     if not len(com)-1 <= 3:

@@ -11,4 +11,4 @@ import storage
 def command(args, optargs, bl):
     if len(optargs) > 0:
         return optargs[0]
-    return
+    return True

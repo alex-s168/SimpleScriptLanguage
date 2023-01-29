@@ -34,5 +34,5 @@ cmdl.append(main.command("cinput", 1, 0, cmd_cinput.command))
 def cmd(com: str, args: list, bl: list):
     for i in cmdl:
         if com.rstrip() == i.name:
-            i.call(bl, args)
-            return True
+            return [True, i.call(bl, args)]
+    return [False, None]

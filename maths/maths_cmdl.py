@@ -63,5 +63,5 @@ cmdl.append(main.command("pow", 3, 0, cmd_sign.command))
 def cmd(com: str, args: list, bl: list):
     for i in cmdl:
         if com.rstrip() == i.name:
-            i.call(bl, args)
-            return True
+            return [True, i.call(bl, args)]
+    return [False, None]
