@@ -10,40 +10,11 @@ iter vtest loop
 lcfb stest2.ssl
 jsr funztalles
 
+log sende!!!
+
 end
 
 :loop
 grv _pass vtmp0
 log vtmp0
 ret
-
-#var out i0
-#
-#add i10 i10 vout
-#log sADD
-#log vout
-#log i20
-#sub i20 i10 vout
-#log sSUB
-#log vout
-#log i10
-#mul i5 i2 vout
-#log sMUL
-#log vout
-#log i10
-#div i20 i2 vout
-#log sDIV
-#log vout
-#log i10
-#mod i30 i20 vout
-#log sMOD
-#log vout
-#log i10
-#fact i4 vout
-#log sFACT
-#log vout
-#log i24
-#sum vout i5 i20 i15
-#log sSUM
-#log vout
-#log i40

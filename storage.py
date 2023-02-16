@@ -21,6 +21,8 @@ todecodeblocks_done = 0
 todo_end = False
 todo_end_msg = ""
 
+stop_e = False
+
 def get_var_size():
     s = 0
     s += sys.getsizeof(blocknames)

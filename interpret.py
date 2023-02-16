@@ -210,11 +210,14 @@ def isnone(i):
         return False
 
 def decodeblock(name, _bl):
+    if storage.stop_e == True:
+        return
+
     if not __name__ == "__main__":
         storage.todecodeblocks.append(name)
         storage.todecodeblocks_bl.append(_bl)
         return
-    
+
     bl = _bl
 
     contdec = True
@@ -384,7 +387,7 @@ def decodeblock(name, _bl):
                     print("Program stopped:", storage.todo_end_msg)
                 else:
                     print("Program stopped!")
-                sys.exit(1)
+                storage.stop_e = True
 
             line += 1
 
@@ -395,21 +398,21 @@ if __name__ == "__main__":
 
     for i in range(0, len(storage.todecodeblocks)):
         storage.todecodeblocks_done += 1
-        decodeblock(storage.todecodeblocks[i], storage.todecodeblocks_bl[i])
+        if not storage.stop_e:
+            decodeblock(storage.todecodeblocks[i], storage.todecodeblocks_bl[i])
 
     time_run_end = time.time()
     time_total_end = time.time()
 
-    print("\nProgramm Finished!\n")
-    print("dev data:")
+    if not storage.stop_e:
+        print("\nProgramm Finished!")
+    print("\ndev data:")
     print("runtime: PYTHON-3-STANDARD-INTERPRETER")
     print("version: alpha.0.12 (16.02.2023)")
     print("total variables:",len(storage.varlist))
     print("- user variables:",len(storage.varlist)-storage.tempvaramount)
     print("- temp variables:",storage.tempvaramount)
     print("total blocks:",len(storage.blocks)+len(storage.imported_blocks))
-    print("- local blocks:",len(storage.blocks))
-    print("- imported blocks:",len(storage.imported_blocks))
     print("total time:",(time_total_end-time_total_start)* 1000,"ms")
     print("- decode time:",(time_dec_end-time_dec_start)* 1000,"ms")
     print("- run time:",(time_run_end-time_run_start)* 1000,"ms")
