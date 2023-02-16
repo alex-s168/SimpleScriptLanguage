@@ -380,8 +380,6 @@ if __name__ == "__main__":
     time_run_end = time.time()
     time_total_end = time.time()
 
-    import os, psutil; used_mem = psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2 * 1.049
-
     print("\nProgramm Finished!\n")
     print("dev data:")
     print("runtime: PYTHON-3-STANDARD-INTERPRETER")
@@ -397,7 +395,3 @@ if __name__ == "__main__":
     print("- run time:",(time_run_end-time_run_start)* 1000,"ms")
     print("- - run time (no delay):",(time_run_end-time_run_start-storage.total_delay)* 1000,"ms (might be unaccurate when delay is used)")
     print("- - run time (no delay + no cinput):",(time_run_end-time_run_start-storage.total_delay-storage.total_cinput_delay)* 1000,"ms (might be unaccurate when cinput or delay is used)")
-    print("used memory:",used_mem,"MB")
-    print("- main:",storage.get_var_size()*0.000001,"MB")
-    print("- runtime:",14,"MB (inaccurate)")
-    print("- interpreter:",used_mem-14,"MB (inaccurate)")
