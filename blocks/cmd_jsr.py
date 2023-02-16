@@ -11,5 +11,5 @@ import storage
 def command(args, optargs, bl):
     t = main.decodeblock(args[0],bl)
     
-    if len(optargs > 0):
+    if len(optargs) > 0:
         main.store(optargs[0], t,bl)

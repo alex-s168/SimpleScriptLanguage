@@ -1,6 +1,11 @@
 import time
 import sys
 import math
+import os
+
+# fix modules not found by appending to paths
+current = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(current)
 
 if __name__ == "__main__":
     import basic.basic_cmdl as basic_cmdl
@@ -205,6 +210,11 @@ def isnone(i):
         return False
 
 def decodeblock(name, _bl):
+    if not __name__ == "__main__":
+        storage.todecodeblocks.append(name)
+        storage.todecodeblocks_bl.append(_bl)
+        return
+    
     bl = _bl
 
     contdec = True
@@ -217,8 +227,7 @@ def decodeblock(name, _bl):
             try:
                 com = getblock(name)[line]
             except:
-                print("\nPROGRAMM STOPPED! IT IS RECOMMENDED TO USE THE end COMMAND ON THE END OF THE PROGRAMM!")
-                sys.exit(-1)
+                return
             if bl[0][0] == name:
                 bl=[["__main__",""]]
 
@@ -370,12 +379,23 @@ def decodeblock(name, _bl):
                 case _:
                     pass
 
-            line += 1 
+            if storage.todo_end and len(storage.todecodeblocks)-storage.todecodeblocks_done==0:
+                if not storage.todo_end_msg == "":
+                    print("Program stopped:", storage.todo_end_msg)
+                else:
+                    print("Program stopped!")
+                sys.exit(1)
+
+            line += 1
 
 time_run_start = time.time()
 
 if __name__ == "__main__":
     decodeblock("__main__",[["__main__",""]])
+
+    for i in range(0, len(storage.todecodeblocks)):
+        storage.todecodeblocks_done += 1
+        decodeblock(storage.todecodeblocks[i], storage.todecodeblocks_bl[i])
 
     time_run_end = time.time()
     time_total_end = time.time()
@@ -383,7 +403,7 @@ if __name__ == "__main__":
     print("\nProgramm Finished!\n")
     print("dev data:")
     print("runtime: PYTHON-3-STANDARD-INTERPRETER")
-    print("version: alpha.0.11 (13.01.2023)")
+    print("version: alpha.0.12 (16.02.2023)")
     print("total variables:",len(storage.varlist))
     print("- user variables:",len(storage.varlist)-storage.tempvaramount)
     print("- temp variables:",storage.tempvaramount)

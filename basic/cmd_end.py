@@ -9,8 +9,8 @@ import storage
 
 
 def command(args, optargs, bl):
+    storage.todo_end = True
     try:
         optargs[0]
-        sys.exit("Programm stopped! " + main.parsearg(optargs[0], bl))
-    except:
-        sys.exit("Programm stopped!")
+        storage.todo_end_msg = main.parsearg(optargs[0], bl)
+    except: pass

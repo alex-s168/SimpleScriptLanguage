@@ -14,6 +14,13 @@ imported_blocks = []
 tempvaramount = 0
 file = "test.ssl"
 
+todecodeblocks = []
+todecodeblocks_bl = []
+todecodeblocks_done = 0
+
+todo_end = False
+todo_end_msg = ""
+
 def get_var_size():
     s = 0
     s += sys.getsizeof(blocknames)
