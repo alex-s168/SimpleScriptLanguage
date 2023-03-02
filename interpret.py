@@ -1,3 +1,5 @@
+'''Main code file for run'''
+
 import time
 import sys
 import math
@@ -55,13 +57,13 @@ def storeb(where, val,bl):
     elif where == "_pass":
         pass
     else:
-        errorprinter("No storage named ",where , "!",bl)
+        errorprinter("No storage named "+ where + "!",bl)
 
 def arrize(r,bl):
     x = r.split(",")
     n =  []
     for i in x:
-        n.append(parsearg(i))
+        n.append(parsearg(i, bl))
     return n
 
 def arrizeb(r,bl):
@@ -71,7 +73,7 @@ def arrizeb(r,bl):
         n.append(i)
     return n
 
-def parsearg(arg,bl):
+def parsearg(arg, bl):
     b = arg[0]
     r = arg[1:]
 
@@ -98,7 +100,7 @@ def parsearg(arg,bl):
     if b == "b":
         return bool(r)
     if b == "a":
-        return arrize(r)
+        return arrize(r, bl)
     errorprinter("Datatype " + b + " does not exist!",bl)
     sys.exit(-1)
 
@@ -163,8 +165,8 @@ if __name__ == "__main__":
     storage.blocknames = t[1]
     time_dec_end = time.time()
 
-def insext(list: list, list2: list, pos: int):
-    l = list
+def insext(li: list, list2: list, pos: int):
+    l = li
 
     c = pos
     for i in list2:
